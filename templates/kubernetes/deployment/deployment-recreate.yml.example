@@ -1,0 +1,55 @@
+# =============================================================================
+# Template: Kubernetes Deployment - Recreate Strategy
+# -----------------------------------------------------------------------------
+# Strategy Recreate: tat tat ca Pod cu truoc, sau do tao Pod moi.
+# Phu hop khi ung dung KHONG the chay dong thoi 2 phien ban (vd: database,
+# ung dung dung shared volume, hoac can downtime de migrate).
+#
+# Huong dan:
+#   1. Copy file nay va doi ten bo .example
+#   2. Thay cac placeholder:
+#      - <APP_NAME>        : ten ung dung (vd: car-serv, api-gateway)
+#      - <NAMESPACE>       : namespace da tao (vd: car-serv)
+#      - <DOCKER_IMAGE>    : docker image (vd: elroydevops/car-serv:latest)
+#      - <CONTAINER_PORT>  : port container lang nghe (vd: 80, 8080, 3000)
+#      - <REPLICAS>        : so luong pod chay song song (vd: 2, 3)
+#   3. Apply:
+#      kubectl apply -f deployment-recreate.yml
+#   4. Kiem tra:
+#      kubectl get deployments -n <NAMESPACE>
+#      kubectl rollout status deployment/<APP_NAME>-deployment -n <NAMESPACE>
+#
+# Luu y:
+#   - Se co downtime trong qua trinh deploy (tat het Pod cu roi moi tao moi).
+#   - Nen dung cho moi truong dev/staging hoac ung dung chap nhan downtime.
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: <APP_NAME>-deployment
+  name: <APP_NAME>-deployment
+  namespace: <NAMESPACE>
+spec:
+  replicas: <REPLICAS>
+  strategy:
+    type: Recreate
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: <APP_NAME>-deployment
+  template:
+    metadata:
+      labels:
+        app: <APP_NAME>-deployment
+      namespace: <NAMESPACE>
+    spec:
+      containers:
+        - image: <DOCKER_IMAGE>
+          imagePullPolicy: Always
+          name: <APP_NAME>
+          ports:
+            - containerPort: <CONTAINER_PORT>
+              name: tcp
+              protocol: TCP
