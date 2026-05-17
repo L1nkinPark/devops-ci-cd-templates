@@ -1,0 +1,62 @@
+# =============================================================================
+# Template: Kubernetes Deployment - RollingUpdate Strategy
+# -----------------------------------------------------------------------------
+# Strategy RollingUpdate: thay the Pod cu bang Pod moi dan dan, dam bao
+# ung dung luon co san trong qua trinh deploy (zero-downtime).
+#
+# Cau hinh:
+#   - maxSurge: so Pod moi duoc tao them (vuot qua replicas) trong luc update
+#   - maxUnavailable: so Pod cu duoc phep tat cung luc trong luc update
+#   Co the dung so nguyen (1, 2) hoac phan tram (25%)
+#
+# Huong dan:
+#   1. Copy file nay va doi ten bo .example
+#   2. Thay cac placeholder:
+#      - <APP_NAME>        : ten ung dung (vd: car-serv, api-gateway)
+#      - <NAMESPACE>       : namespace da tao (vd: car-serv)
+#      - <DOCKER_IMAGE>    : docker image (vd: elroydevops/car-serv:latest)
+#      - <CONTAINER_PORT>  : port container lang nghe (vd: 80, 8080, 3000)
+#      - <REPLICAS>        : so luong pod chay song song (vd: 2, 3)
+#   3. Apply:
+#      kubectl apply -f deployment-rolling.yml
+#   4. Kiem tra:
+#      kubectl get deployments -n <NAMESPACE>
+#      kubectl rollout status deployment/<APP_NAME>-deployment -n <NAMESPACE>
+#
+# Luu y:
+#   - Day la strategy mac dinh va pho bien nhat cho production.
+#   - Chinh maxSurge va maxUnavailable phu hop voi tai nguyen cluster.
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: <APP_NAME>-deployment
+  name: <APP_NAME>-deployment
+  namespace: <NAMESPACE>
+spec:
+  replicas: <REPLICAS>
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # so Pod moi tao them, co the dung 25%
+      maxUnavailable: 1   # so Pod cu tat cung luc, co the dung 25%
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: <APP_NAME>-deployment
+  template:
+    metadata:
+      labels:
+        app: <APP_NAME>-deployment
+      namespace: <NAMESPACE>
+    spec:
+      containers:
+        - image: <DOCKER_IMAGE>
+          imagePullPolicy: Always
+          name: <APP_NAME>
+          ports:
+            - containerPort: <CONTAINER_PORT>
+              name: tcp
+              protocol: TCP
