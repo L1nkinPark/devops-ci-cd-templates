@@ -8,6 +8,14 @@
 #
 # Cach su dung:
 #   kubectl apply -f ingress-car-serv.yml
+#   Hoac cai dung thang tren Rancher (Import YAML)
+#
+# Luu y:
+#   - Bat buoc phai co "ingressClassName: nginx" trong spec
+#   - Neu day khong phai domain ngoai (domain that) thi phai add host tren may client:
+#     sudo vi /etc/hosts    (Linux/Mac)
+#     notepad C:\Windows\System32\drivers\etc\hosts    (Windows)
+#     => Them dong: <NODE_IP> car-serv-onpre.devopsedu.vn
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
