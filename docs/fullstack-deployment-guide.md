@@ -110,9 +110,48 @@ apt install docker.io -y
 
 ### 1. Chuan bi file
 
-Trong thu muc du an frontend, can co:
+Trong thu muc du an frontend, can co 2 file:
 - `Dockerfile` (copy tu [`npm-dist-nginx-alpine.Dockerfile.example`](../templates/docker/frontend/angular/npm-dist-nginx-alpine.Dockerfile.example))
 - `nginx.conf` (copy tu [`nginx.conf.example`](../templates/docker/frontend/angular/nginx.conf.example))
+
+**Noi dung file `Dockerfile`:**
+
+```dockerfile
+## build stage ##
+FROM node:18.18-alpine AS build
+WORKDIR /app
+COPY . .
+RUN npm install --force
+RUN npm run build
+
+## run stage ##
+FROM nginx:alpine
+
+# Doi `angular-ecommerce` thanh ten project thuc te cua ban.
+COPY --from=build /app/dist/angular-ecommerce /usr/share/nginx/html
+
+# Copy cau hinh Nginx de fix loi 404 khi dung Angular routing
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**Noi dung file `nginx.conf`:**
+
+```nginx
+server {
+    listen 80;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+
+        # Bat buoc cho Angular: Neu khong tim thay file, tra ve index.html
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
 
 ### 2. Build Docker image
 
@@ -202,7 +241,32 @@ spring.datasource.password=<DB_PASSWORD>
 
 ### 2. Chuan bi file Dockerfile
 
-Copy tu [`Dockerfile.example`](../templates/docker/backend/java/Dockerfile.example) hoac [`maven-jar-openjdk8-jre-alpine.Dockerfile.example`](../templates/docker/backend/java/maven-jar-openjdk8-jre-alpine.Dockerfile.example).
+Copy tu [`maven-jar-temurin17-jre-alpine.Dockerfile.example`](../templates/docker/backend/java/maven-jar-temurin17-jre-alpine.Dockerfile.example) (Java 17) hoac [`maven-jar-openjdk8-jre-alpine.Dockerfile.example`](../templates/docker/backend/java/maven-jar-openjdk8-jre-alpine.Dockerfile.example) (Java 8).
+
+**Noi dung file `Dockerfile` (Java 17):**
+
+```dockerfile
+## build stage ##
+FROM maven:3.8.3-openjdk-17 AS build
+
+WORKDIR ./src
+COPY . .
+
+RUN mvn install -DskipTests=true
+
+## run stage ##
+FROM eclipse-temurin:17-jre-alpine
+
+# Set timezone ve Asia/Ho_Chi_Minh
+RUN rm -f /etc/localtime && ln -s /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
+
+# Doi ten JAR cho dung voi artifact thuc te cua du an.
+COPY --from=build src/target/spring-boot-ecommerce-0.0.1-SNAPSHOT.jar /run/spring-boot-ecommerce-0.0.1-SNAPSHOT.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/run/spring-boot-ecommerce-0.0.1-SNAPSHOT.jar"]
+```
 
 ### 3. Build Docker image
 
