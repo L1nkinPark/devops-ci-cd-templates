@@ -102,6 +102,15 @@ shared:
     notes: >
       Reset cum K8s de cai lai tu dau: kubeadm reset, xoa etcd va manifests.
 
+  - id: shared-k8s-metrics-server
+    category: kubernetes
+    platform: ubuntu
+    file: templates/shared/metrics-server/install-metrics-server.sh.example
+    maturity: draft
+    notes: >
+      Bash script cai dat Metrics Server cho Kubernetes su dung Helm,
+      ho tro cau hinh bo qua xac thuc TLS doi voi certificate tu ky.
+
 kubernetes:
   - id: k8s-namespace-template
     kind: Namespace
