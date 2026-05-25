@@ -84,25 +84,26 @@ kubectl apply -f pv.yml
 ### Bước 3: Tạo PersistentVolumeClaim (PVC) trong ứng dụng
 Ứng dụng sẽ yêu cầu dung lượng lưu trữ thông qua PVC.
 
-Ví dụ file `app-pvc.yml`:
+Sử dụng file template [pvc.yml.example](pvc.yml.example) (bỏ đuôi `.example`):
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: app-nfs-pvc
-  namespace: <NAMESPACE>
+  name: nfs-pvc
+  namespace: ecommerce
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: nfs-storage
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi
+  storageClassName: nfs-storage
 ```
+*Lưu ý: Thay thế `namespace` và `storage` cho phù hợp với yêu cầu thực tế của ứng dụng.*
 
 Apply PVC:
 ```bash
-kubectl apply -f app-pvc.yml -n <NAMESPACE>
+kubectl apply -f pvc.yml
 ```
 
 ---

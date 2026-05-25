@@ -206,5 +206,13 @@ kubernetes:
       Template cau hinh PersistentVolume (PV) thu cong su dung NFS Storage
       cho moi truong on-premise.
 
+  - id: k8s-pvc-nfs-template
+    kind: PersistentVolumeClaim
+    file: templates/kubernetes/storage/pvc.yml.example
+    maturity: draft
+    notes: >
+      Template cau hinh PersistentVolumeClaim (PVC) su dung NFS Storage
+      cho cac ung dung trong namespace.
+
 
 
