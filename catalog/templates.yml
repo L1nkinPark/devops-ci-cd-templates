@@ -197,6 +197,14 @@ kubernetes:
       Template tao StatefulSet MariaDB mount PersistentVolumeClaim (PVC)
       su dung NFS Storage voi fsGroup duoc thiet lap la 65534.
 
+  - id: k8s-service-mariadb-template
+    kind: Service
+    file: templates/kubernetes/service/mariadb-service.yml.example
+    maturity: draft
+    notes: >
+      Template tao Service NodePort cho MariaDB de expose cong 3306
+      ra cong vat ly 31306 tren cac node.
+
   - id: k8s-fullstack-rolling-clusterip-ingress
     kind: Deployment+Service+Ingress
     file: templates/kubernetes/full-stack/fullstack-rolling-clusterip-ingress.yml.example
