@@ -172,6 +172,14 @@ kubernetes:
       Template tao Pod co resource limits. Thay <APP_NAME>, <NAMESPACE>,
       <DOCKER_IMAGE>, <CONTAINER_PORT> bang gia tri thuc te.
 
+  - id: k8s-pod-nfs-template
+    kind: Pod
+    file: templates/kubernetes/pod-nfs.yml.example
+    maturity: draft
+    notes: >
+      Template tao Pod Nginx mount PersistentVolumeClaim (PVC)
+      su dung NFS Storage.
+
   - id: k8s-fullstack-rolling-clusterip-ingress
     kind: Deployment+Service+Ingress
     file: templates/kubernetes/full-stack/fullstack-rolling-clusterip-ingress.yml.example
