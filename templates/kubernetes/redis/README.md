@@ -42,57 +42,71 @@ Quá trình này có thể được thực hiện trực tiếp trên máy chủ
    kubectl create namespace architecture
    ```
 
-2. **Áp dụng cấu hình PV & PVC cho Redis**:
+2. **Cấu hình lưu trữ vật lý trên NFS Server** (Thực hiện trên máy chủ `databaseserver`):
+   Tạo thư mục chia sẻ cho Redis và phân quyền ghi đọc đầy đủ để tránh lỗi Permission Denied từ Pod:
+   ```bash
+   sudo mkdir -p /data/redis
+   sudo chown -R nobody:nogroup /data/
+   sudo chmod -R 777 /data
+   ```
+
+3. **Áp dụng cấu hình PV & PVC cho Redis**:
    Đảm bảo tệp `redis-pv-pvc.yml` đã được cập nhật đúng địa chỉ IP của NFS Server, sau đó triển khai:
    ```bash
    kubectl apply -f templates/kubernetes/storage/redis-pv-pvc.yml -n architecture
    ```
 
-3. **Kiểm tra trạng thái liên kết đĩa**:
-   Đảm bảo PVC đã chuyển sang trạng thái `Bound` trước khi tiếp tục:
+4. **Kiểm tra trạng thái liên kết đĩa (PVC)**:
+   Bạn có thể đăng nhập giao diện **Rancher** để xem PVC `redis-pvc` đã chuyển sang trạng thái **`Bound`** hay chưa, hoặc kiểm tra bằng CLI:
    ```bash
    kubectl get pvc redis-pvc -n architecture
    ```
 
 ---
 
-### BƯỚC 2: Thêm Repo Helm và chuẩn bị cấu hình
+### BƯỚC 2: Tạo thư mục làm việc & Chuẩn bị cấu hình
 
-1. **Thêm kho lưu trữ Bitnami Helm**:
+1. **Tạo thư mục làm việc trên K8S Master**:
+   ```bash
+   mkdir -p redis
+   cd redis
+   ```
+
+2. **Khởi tạo file cấu hình `values.yaml`**:
+   Sao chép tệp mẫu `values.yml.example` sang `values.yaml` trong thư mục làm việc của bạn:
+   ```bash
+   cp templates/kubernetes/redis/values.yml.example values.yaml
+   ```
+
+3. **Thêm kho lưu trữ Bitnami Helm & Cập nhật**:
    ```bash
    helm repo add bitnami https://charts.bitnami.com/bitnami
    helm repo update
-   ```
-
-2. **Khởi tạo file `values.yaml`**:
-   Sao chép tệp mẫu `values.yml.example` sang `values.yaml` và kiểm tra lại thông số:
-   ```bash
-   cp templates/kubernetes/redis/values.yml.example values.yaml
    ```
 
 ---
 
 ### BƯỚC 3: Cài đặt cụm Redis bằng Helm
 
-Thực hiện lệnh cài đặt với tệp cấu hình `values.yaml` trong namespace `architecture`:
+Thực hiện lệnh cài đặt với tệp cấu hình `values.yaml` trong namespace `architecture` sử dụng cú pháp chuẩn Bitnami:
 
 ```bash
 helm install redis-sentinel bitnami/redis --values values.yaml --namespace architecture
 ```
 
 > [!NOTE]
-> Nếu bạn muốn nâng cấp cấu hình trong tương lai, chỉ cần chỉnh sửa `values.yaml` và chạy lệnh:
+> Nếu bạn muốn nâng cấp hoặc cập nhật cấu hình trong tương lai, chỉ cần chỉnh sửa `values.yaml` và chạy lệnh:
 > `helm upgrade redis-sentinel bitnami/redis --values values.yaml --namespace architecture`
 
 ---
 
 ## 3. Các lệnh kiểm tra vận hành và giám sát
 
-Sau khi chạy lệnh deploy, hãy thực hiện các bước sau để đảm bảo cụm Redis hoạt động ổn định:
+Sau khi triển khai thành công, hãy thực hiện các bước sau để đảm bảo cụm Redis hoạt động ổn định:
 
 ### 1. Kiểm tra trạng thái các Pods và Services
 ```bash
-# Kiểm tra danh sách các Pod (Đợi cho tới khi tất cả pod đều ở trạng thái Running 1/1 hoặc 2/2)
+# Kiểm tra danh sách các Pod (Đợi cho tới khi tất cả pod đều ở trạng thái Running 2/2)
 kubectl get pods -n architecture -w
 
 # Kiểm tra danh sách Services
@@ -116,29 +130,60 @@ kubectl delete pod redis-sentinel-node-0 -n architecture
 kubectl logs statefulset/redis-sentinel-node -n architecture -c sentinel -f
 ```
 
+## 4. Hướng dẫn kết nối kiểm tra và tích hợp Backend
+
+> [!IMPORTANT]
+> **Lưu ý về Mạng nội bộ trong Kubernetes:**
+> - Các Pod trong Kubernetes giao tiếp với nhau qua một mạng riêng ảo được quản lý bởi Network Policy.
+> - Để các ứng dụng/dịch vụ (như Backend gọi đến Redis) có thể kết nối được với nhau, chúng sẽ đi qua **Service** và loại Service sử dụng là **ClusterIP** (mặc định của chart).
+> - Định dạng định danh DNS mạng nội bộ K8s chuẩn:
+>   `<service_name>.<namespace>.svc.cluster.local` (cú pháp kết nối đến host).
+> - Service Name cho Redis Sentinel: `redis-sentinel`
+> - Cổng Sentinel mặc định: `26379`
+> - Cú pháp kết nối: `redis-cli -h <host> -p <port> -a <password>`
+
+### BƯỚC 1: Khởi chạy Pod và cài đặt Redis CLI
+Ta sử dụng một Pod chạy hệ điều hành Alpine tạm thời để cài đặt `redis-cli` thông qua trình quản lý gói `apk` (kubectl shell):
+
+```bash
+# 1. Khởi chạy một Pod Alpine kiểm thử tạm thời
+kubectl run redis-client --rm -i --tty --image alpine --namespace architecture -- sh
+
+# 2. Bên trong shell của container Alpine, chạy lệnh cài đặt redis-cli:
+apk update
+apk add redis
+```
+
+### BƯỚC 2: Kiểm tra kết nối tới Sentinel & Xác định Master hiện tại
+
+1. **Kết nối tới Redis Sentinel thông qua DNS nội bộ**:
+   ```bash
+   redis-cli -h redis-sentinel.architecture.svc.cluster.local -p 26379 -a devopseduvn
+   ```
+
+2. **Truy vấn địa chỉ IP của Master hiện tại từ Sentinel**:
+   Sau khi đã đăng nhập thành công vào Sentinel, gõ lệnh sau để lấy thông tin Master:
+   ```text
+   redis-sentinel.architecture.svc.cluster.local:26379> SENTINEL get-master-addr-by-name mymaster
+   ```
+   *Kết quả trả về sẽ là địa chỉ IP nội bộ cùng cổng (6379) của Pod Master hiện tại (ví dụ: `redis-sentinel-node-0`).*
+
+3. **Thoát khỏi client**:
+   ```text
+   redis-sentinel.architecture.svc.cluster.local:26379> exit
+   ```
+
 ---
 
-## 4. Hướng dẫn kết nối kiểm tra từ Client nội bộ
+### BƯỚC 3: Kết nối trực tiếp đến Redis Node (Đọc/Ghi dữ liệu)
 
-Để kiểm tra khả năng kết nối và xác thực mật khẩu của Redis:
-
-1. **Khởi chạy một Pod kiểm thử chạy redis-cli**:
+1. **Kết nối trực tiếp tới Headless Service của Redis Master/Replica**:
    ```bash
-   kubectl run redis-client --rm -i --tty --image bitnami/redis:latest --namespace architecture -- bash
+   redis-cli -h redis-sentinel-headless.architecture.svc.cluster.local -p 6379 -a devopseduvn
    ```
 
-2. **Kiểm tra kết nối trực tiếp đến Service của cụm**:
-   ```bash
-   # Kết nối tới Redis Sentinel (Cổng 26379)
-   redis-cli -h redis-sentinel -p 26379 -a devopseduvn
-
-   # Hoặc kết nối trực tiếp tới Redis Node (Cổng 6379)
-   redis-cli -h redis-sentinel-headless -p 6379 -a devopseduvn
-   ```
-
-3. **Kiểm tra trạng thái Replication bằng lệnh Redis**:
-   Sau khi đã kết nối thành công, chạy lệnh:
+2. **Kiểm tra trạng thái Replication**:
    ```text
-   127.0.0.1:6379> info replication
+   redis-sentinel-headless.architecture.svc.cluster.local:6379> info replication
    ```
-   *Màn hình sẽ hiển thị thông tin chi tiết về vai trò (`role:master` hoặc `role:slave`) và danh sách các replica đang kết nối.*
+   *Màn hình sẽ hiển thị chi tiết vai trò (`role:master` hoặc `role:slave`) và danh sách 3 Replicas đang kết nối đồng bộ.*
