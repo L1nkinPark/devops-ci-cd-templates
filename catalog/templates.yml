@@ -200,6 +200,23 @@ shared:
       Bash script tu dong trien khai Uptime Kuma tren Kubernetes tu Namespace,
       PV/PVC, Helm values va Ingress.
 
+  - id: shared-k8s-uptime-kuma-setup-guide
+    category: kubernetes
+    platform: ubuntu
+    file: on-premise/setup/monitoring/setup-uptime-kuma-guide.md
+    maturity: draft
+    notes: >
+      Huong dan tung buoc trien khai Uptime Kuma tren K8s, bao gom
+      cau hinh NFS Server, PV/PVC, Helm values, Ingress va sua loi DNS Host Aliases.
+
+  - id: shared-k8s-kube-prometheus-setup-guide
+    category: kubernetes
+    platform: ubuntu
+    file: on-premise/setup/monitoring/setup-kube-prometheus-guide.md
+    maturity: draft
+    notes: >
+      Huong dan chi tiet trien khai kube-prometheus-stack tren Kubernetes su dung Helm chart.
+
 kubernetes:
   - id: k8s-namespace-template
     kind: Namespace
