@@ -297,6 +297,14 @@ kubernetes:
       Template cau hinh values.yaml de cai dat Redis Replication + Sentinel
       su dung Helm Chart Bitnami tren Kubernetes.
 
+  - id: k8s-uptime-kuma-helm-values-template
+    kind: HelmValues
+    file: on-premise/kubernetes/uptime-kuma/values.yml.example
+    maturity: draft
+    notes: >
+      Template cau hinh values.yaml de cai dat Uptime Kuma su dung existingClaim PVC.
+
+
 
 
 
