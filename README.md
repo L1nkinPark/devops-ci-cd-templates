@@ -154,6 +154,7 @@ Phan `scenario` nen mo ta du 4 y:
 | StatefulSet | mariadb | MariaDB StatefulSet | `statefulset/mariadb-statefulset.yml.example` |
 | Resource Limit | deployment-limit | Deployment voi resource request va limit | `resource-limit/deployment-with-resource-limit.yml.example` |
 | Redis | values | Helm values.yaml cho Redis Replication + Sentinel | `redis/values.yml.example` |
+| Uptime Kuma | values | Helm values.yaml cho Uptime Kuma su dung existing PVC | `uptime-kuma/values.yml.example` |
 | Full-Stack | fullstack | Deployment (RollingUpdate) + Service (ClusterIP) + Ingress trong 1 file | `full-stack/fullstack-rolling-clusterip-ingress.yml.example` |
 | Load Balancer | nginx-lb | Nginx config phan phoi traffic den K8s node qua NodePort 30080 | `load-balancer/nginx/k8s-loadbalancer.conf` |
 
