@@ -181,6 +181,8 @@ Phan `scenario` nen mo ta du 4 y:
 | MySQL | Huong dan cai dat MySQL Server, tao database va user | `mysql/install-mysql-guide.md` |
 | NFS | Huong dan cai dat va cau hinh NFS Server | `nfs/nfs-server-guide.md` |
 | NFS | Huong dan cai dat NFS Client va kiem tra ket noi | `nfs/nfs-client-guide.md` |
+| Monitoring | Huong dan trien khai Uptime Kuma (PV/PVC, Helm, Ingress, HostAlias) | `monitoring/setup-uptime-kuma-guide.md` |
+| Monitoring | Huong dan trien khai Kube Prometheus Stack (Prometheus + Grafana) | `monitoring/setup-kube-prometheus-guide.md` |
 
 ### 🛠️ On-Premise Scripts
 
