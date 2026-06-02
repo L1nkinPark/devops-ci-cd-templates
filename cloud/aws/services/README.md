@@ -178,6 +178,7 @@ VPC la mang ao rieng tren AWS, cho phep ban dinh nghia dai IP, subnet, route tab
 - [3. Amazon IAM Policy](2. IAM/3. Amazon IAM Policy.md): Tìm hiểu về chính sách phân quyền, cấu trúc Statement, phân loại Inline vs Managed Policies và tiêu chí lựa chọn.
 - [4. Amazon IAM User](2. IAM/4. Amazon IAM User.md): Đại diện cho hồ sơ người dùng trên AWS, phương thức truy cập qua Console/Programmatic và nguyên tắc cấp quyền mặc định.
 - [5. Amazon IAM Role](2. IAM/5. Amazon IAM Role.md): Vai trò phân quyền, so sánh khái niệm, ứng dụng gắn vào EC2/Lambda, cross-account assume-role và tầm quan trọng trong troubleshooting.
+- [6. Amazon IAM Group](2. IAM/6. Amazon IAM Group.md): Nhóm người dùng, phân chia quyền theo phòng ban/vai trò, cơ chế kế thừa quyền và các quy tắc xung đột, lồng nhau.
 
 **No la gi:**
 IAM la dich vu quan ly quyen truy cap tren AWS. IAM cho phep tao user, group, role va policy de kiem soat ai duoc phep lam gi voi tai nguyen AWS. Trong DevOps, IAM role duoc su dung cho EC2 instance, EKS pod (IRSA), Lambda function va CI/CD pipeline.
