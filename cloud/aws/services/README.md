@@ -1,5 +1,7 @@
 # AWS Services cho DevOps / CI-CD
 
+![AWS Services Overview](aws_services_banner.png)
+
 Thu muc nay mo ta cac dich vu AWS thuong duoc su dung trong quy trinh DevOps va CI/CD. Moi dich vu duoc trinh bay voi ten, mo ta ngan, truong hop su dung va huong dan co ban de bat dau.
 
 ---
