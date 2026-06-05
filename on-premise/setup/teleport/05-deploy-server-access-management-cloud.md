@@ -129,3 +129,107 @@ Sau khi dịch vụ khởi chạy thành công, tạo tài khoản quản trị 
 2. **Thiết lập tài khoản:**
    * Mở liên kết kích hoạt được in ra màn hình trên trình duyệt: `https://teleport.h1eudayne.work:443/web/newuser/<token>`
    * Thiết lập mật khẩu và quét mã QR để cấu hình xác thực 2 lớp (MFA/2FA - như Google Authenticator, Authy) để hoàn tất kích hoạt tài khoản và đăng nhập vào giao diện Web quản trị của Teleport.
+
+---
+
+### Hướng dẫn xử lý lỗi (Troubleshooting Bug)
+
+#### Lỗi: `x509: certificate signed by unknown authority`
+Lỗi này thường xảy ra khi bạn sử dụng Cloudflare Proxy (đám mây màu cam) và Cloudflare SSL/TLS đang bật tính năng kiểm duyệt chứng chỉ từ origin, hoặc do Let's Encrypt không thể tự động xác thực chứng chỉ ACME trực tiếp đến máy chủ EC2. Để khắc phục triệt để bằng cách sử dụng **Cloudflare Origin Certificate** (Chứng chỉ gốc của Cloudflare), hãy làm theo các bước sau:
+
+##### 1. Tạo chứng chỉ Origin trên Cloudflare
+1. Truy cập Cloudflare Dashboard -> Tên miền của bạn (ví dụ: `h1eudayne.work`).
+2. Chọn menu **SSL/TLS** -> **Origin Server**.
+3. Nhấn nút **Create Certificate**.
+4. Giữ nguyên lựa chọn mặc định:
+   * **Generate private key and CSR with Cloudflare** (RSA 2048).
+   * **Hostnames:** Đảm bảo có chứa tên miền phụ của bạn, ví dụ: `*.h1eudayne.work` và `h1eudayne.work`.
+   * **Certificate Validity:** 15 years (Mặc định).
+5. Nhấn **Create** ở góc dưới cùng bên phải.
+
+![Tạo Origin Certificate trên Cloudflare](../../../images/setup/teleport_cloudflare_origin_cert.png)
+
+*Màn hình hiển thị hai khối văn bản là **Origin Certificate** và **Private Key**.*
+
+##### 2. Lưu chứng chỉ và khóa bảo mật vào EC2 Instance
+Quay lại terminal của máy chủ EC2 và lưu hai chuỗi mã vừa tạo:
+
+1. **Tạo thư mục chứa cert (nếu chưa có):**
+   ```bash
+   sudo mkdir -p /etc/teleport/certs
+   ```
+
+2. **Tạo file chứa Origin Certificate:**
+   Mở trình soạn thảo:
+   ```bash
+   sudo nano /etc/teleport/certs/cert.pem
+   ```
+   *Sao chép toàn bộ nội dung trong khối **Origin Certificate** trên Cloudflare, dán vào file và lưu lại (`Ctrl+O` -> `Enter` -> `Ctrl+X` trên nano).*
+
+3. **Tạo file chứa Private Key:**
+   Mở trình soạn thảo:
+   ```bash
+   sudo nano /etc/teleport/certs/key.pem
+   ```
+   *Sao chép toàn bộ nội dung trong khối **Private Key** trên Cloudflare, dán vào file và lưu lại.*
+
+4. **Phân quyền bảo mật cho file key (Cực kỳ quan trọng):**
+   Để ngăn chặn việc rò rỉ khóa và tránh việc Teleport từ chối khởi động do file key có quyền truy cập quá rộng, thực hiện lệnh phân quyền:
+   ```bash
+   sudo chmod 600 /etc/teleport/certs/key.pem
+   ```
+
+##### 3. Cấu hình lại tệp tin `teleport.yaml`
+1. Mở file cấu hình Teleport:
+   ```bash
+   sudo nano /etc/teleport.yaml
+   ```
+
+2. Tìm đến phần `proxy_service` và chỉnh sửa/thêm khóa `https_keypairs` trỏ đến đường dẫn của các tệp chứng chỉ vừa tạo, đồng thời **bỏ đi hoặc chú thích (comment out) cấu hình ACME** tự động:
+   ```yaml
+   proxy_service:
+     enabled: "yes"
+     web_listen_addr: 0.0.0.0:443
+     public_addr: teleport.h1eudayne.work:443
+     
+     # Thêm khối https_keypairs trỏ về chứng chỉ Cloudflare Origin
+     https_keypairs:
+       - cert_file: /etc/teleport/certs/cert.pem
+         key_file: /etc/teleport/certs/key.pem
+     
+     # Chú thích hoặc xóa cấu hình acme tự động (nếu có)
+     # acme:
+     #   enabled: "yes"
+     #   email: voduchieu42@gmail.com
+   ```
+3. Lưu và thoát file soạn thảo.
+
+##### 4. Cấu hình Trust Store của hệ điều hành (Nếu vẫn gặp lỗi xác thực)
+Nếu các dịch vụ nội bộ hoặc CLI (`tctl`, `tsh`) trên EC2 vẫn báo lỗi chứng chỉ không tin cậy do dùng CA nội bộ của Cloudflare, bạn cần thêm chứng chỉ Root CA của Cloudflare vào trust store của Ubuntu:
+
+1. **Tải về chứng chỉ Cloudflare Origin Root CA:**
+   ```bash
+   wget https://developers.cloudflare.com/ssl/static/origin_ca_rsa_root.pem
+   ```
+
+2. **Sao chép chứng chỉ vào Trust Store của hệ thống:**
+   ```bash
+   sudo cp origin_ca_rsa_root.pem /usr/local/share/ca-certificates/cloudflare-origin.crt
+   ```
+
+3. **Cập nhật danh sách chứng chỉ tin cậy:**
+   ```bash
+   sudo update-ca-certificates
+   ```
+   *(Hệ thống sẽ quét thư mục vừa chép và thêm chứng chỉ Root CA của Cloudflare vào danh sách chứng chỉ tin cậy của hệ điều hành)*
+
+##### 5. Khởi động lại dịch vụ Teleport để áp dụng thay đổi
+```bash
+# Khởi động lại dịch vụ
+sudo systemctl restart teleport
+
+# Kiểm tra lại trạng thái
+sudo systemctl status teleport
+```
+*Trạng thái dịch vụ sẽ chuyển sang màu xanh `active (running)`. Lúc này bạn có thể bật lại chế độ **Proxied** (đám mây màu cam) trên DNS Cloudflare để bảo mật địa chỉ IP thật của EC2 mà không sợ gặp lỗi chứng chỉ x509.*
+
