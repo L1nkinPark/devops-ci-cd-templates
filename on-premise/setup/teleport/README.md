@@ -23,6 +23,8 @@ Thư mục này chứa tài liệu và cấu hình phục vụ việc triển kh
    * Tự động sinh file cấu hình ACME Let's Encrypt `/etc/teleport.yaml`.
    * Khởi chạy dịch vụ Teleport bằng Systemd Service tự động tạo.
    * Tạo tài khoản quản trị `admin` cho phép đăng nhập dưới quyền `root` và `ubuntu`.
+   * Hướng dẫn xử lý lỗi `x509: certificate signed by unknown authority` sử dụng Cloudflare Origin Certificate.
+
 
 
 
