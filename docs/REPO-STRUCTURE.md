@@ -39,9 +39,7 @@ Repo nay duoc to chuc theo muc dich su dung, tach biet ro rang giua cac moi truo
 │   ├── server/                         # Quan tri may chu & VM template
 │   │   ├── README.md                   # Muc luc va gioi thieu
 │   │   ├── 03-setup-server-template.md
-│   │   ├── 04-server-access-management.md
-│   │   ├── 05-deploy-server-access-management.md
-│   │   └── 06-install-teleport.md
+│   │   └── 04-server-access-management.md
 │   ├── setup/                          # Huong dan cai dat theo hoc trinh & cong cu
 │   │   ├── 01-linux-server/            # Bai 1-7: Ubuntu, lenh, vim, phan quyen
 │   │   ├── 02-manual-deployment/       # Bai 8-10: Trien khai thu cong FE, Java Spring
@@ -52,7 +50,12 @@ Repo nay duoc to chuc theo muc dich su dung, tach biet ro rang giua cac moi truo
 │   │   ├── kubernetes/                 # Huong dan K8s nang cao (da hoan thien)
 │   │   ├── mysql/                      # Cau hinh database
 │   │   ├── rancher/                    # Cong cu quan ly K8s
-│   │   └── storage/                    # Ha tang luu tru (NFS)
+│   │   ├── storage/                    # Ha tang luu tru (NFS)
+│   │   └── teleport/                   # Setup cong cu quan ly server Teleport
+│   │       ├── README.md
+│   │       ├── 05-deploy-server-access-management.md
+│   │       └── 06-install-teleport.md
+
 
 │   ├── workflow/                       # Quy trinh van hanh
 │   │   └── kubernetes/
@@ -187,7 +190,7 @@ Thu muc `on-premise/` chia thanh cac nhom chuc nang ro rang:
 
 - `network/` — So do va kien truc mang noi bo (on-premise) va ket noi cloud.
 - `server/` — Tai lieu quan tri, thiet lap he dieu hanh va khoi tao VM template.
-- `setup/` — Tai lieu huong dan cai dat duoc danh so tu 01 den 06 bam sat lo trinh DevOps Fresher, va cac thu muc rieng cho Kubernetes, mysql, rancher, storage.
+- `setup/` — Tai lieu huong dan cai dat duoc danh so tu 01 den 06 bam sat lo trinh DevOps Fresher, va cac thu muc rieng cho Kubernetes, mysql, rancher, storage, teleport.
 - `workflow/` — Quy trinh van hanh, import du lieu, backup, disaster recovery.
 - `scripts/` — Bash scripts tu dong hoa (cai dat K8s, metrics-server, NFS, v.v.).
 - `kubernetes/` — K8s manifest templates (Deployment, Service, HPA, PV/PVC, v.v.).
