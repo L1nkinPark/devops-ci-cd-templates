@@ -136,9 +136,8 @@ Các hướng dẫn thực hành viết code và cấu hình vận hành tự đ
 
 Các hướng dẫn thực hành thiết kế, phân hoạch mạng và cấu hình bảo mật trên AWS VPC:
 
-| File | Mô tả | Công nghệ |
-|------|-------|-----------|
-| [1. Amazon VPC Hands-on Lab(Design and Components)](8.%20VPC/1.%20Amazon%20VPC%20Hands-on%20Lab%28Design%20and%20Components%29.md) | Thực hành thiết kế và triển khai Custom VPC với 8 subnets trên 2 AZs, cấu hình Internet Gateway, NAT Gateway và các bảng định tuyến Route Tables | AWS VPC, Subnetting, Route Table, Internet Gateway, NAT Gateway |
+| [1. Lab 1 – Thiết kế VPC Đơn giản](8.%20VPC/1.%20Lab%201%20-%20Thi%E1%BA%BFt%20k%E1%BA%BF%20VPC%20%C4%90%C6%A1n%20gi%E1%BA%A3n.md) | Thực hành thiết kế sơ đồ phân hoạch mạng và liên kết Security Groups (Draw.io/PowerPoint) đáp ứng Multi-AZ | AWS VPC, Subnetting, Security Group, Draw.io |
+| [2. Lab 2 – Tạo VPC đã thiết kế](8.%20VPC/2.%20Lab%202%20-%20T%E1%BA%A1o%20VPC%20%C4%91%C3%A3%20thi%E1%BA%BFt%20k%E1%BA%BF.md) | Triển khai thực tế trên AWS Console cấu hình tạo VPC, 4 Subnets và gắn Internet Gateway | AWS VPC, Subnetting, Internet Gateway, AWS Console |
 
 ---
 
@@ -202,7 +201,8 @@ cloud/aws/lab/
       README.md
       lambda_function.py
   8. VPC/
-    1. Amazon VPC Hands-on Lab(Design and Components).md
+    1. Lab 1 - Thiết kế VPC Đơn giản.md
+    2. Lab 2 - Tạo VPC đã thiết kế.md
   README.md
 ```
 
