@@ -132,6 +132,14 @@ Các hướng dẫn thực hành viết code và cấu hình vận hành tự đ
 | [3. AWS Lambda Hands-on Lab(EC2 Auto Start-Stop)](7.%20AWS%20Lambda/3.%20AWS%20Lambda%20Hands-on%20Lab%28EC2%20Auto%20Start-Stop%29/3.%20AWS%20Lambda%20Hands-on%20Lab%28EC2%20Auto%20Start-Stop%29.md) | Lập lịch tự động bật/tắt các máy chủ EC2 có gắn thẻ tag chỉ định (ví dụ: Env: Dev) qua EventBridge Rules để tiết kiệm chi phí | AWS Lambda, EC2, EventBridge, Python (boto3) |
 | [4. AWS Lambda Hands-on Lab(Read CSV and Save to DynamoDB)](7.%20AWS%20Lambda/4.%20AWS%20Lambda%20Hands-on%20Lab%28Read%20CSV%20and%20Save%20to%20DynamoDB%29/4.%20AWS%20Lambda%20Hands-on%20Lab%28Read%20CSV%20and%20Save%20to%20DynamoDB%29.md) | Tự động hóa quy trình ETL đọc tệp tin dữ liệu CSV từ S3, phân tích cú pháp và ghi trực tiếp các bản ghi vào bảng DynamoDB | AWS Lambda, S3, DynamoDB, Python (csv) |
 
+### 11. Hướng dẫn thực hành VPC (VPC Hands-on Labs)
+
+Các hướng dẫn thực hành thiết kế, phân hoạch mạng và cấu hình bảo mật trên AWS VPC:
+
+| File | Mô tả | Công nghệ |
+|------|-------|-----------|
+| [1. Amazon VPC Hands-on Lab(Design and Components)](8.%20VPC/1.%20Amazon%20VPC%20Hands-on%20Lab%28Design%20and%20Components%29.md) | Thực hành thiết kế và triển khai Custom VPC với 8 subnets trên 2 AZs, cấu hình Internet Gateway, NAT Gateway và các bảng định tuyến Route Tables | AWS VPC, Subnetting, Route Table, Internet Gateway, NAT Gateway |
+
 ---
 
 ## Cấu trúc khuyến nghị
@@ -193,6 +201,8 @@ cloud/aws/lab/
       4. AWS Lambda Hands-on Lab(Read CSV and Save to DynamoDB).md
       README.md
       lambda_function.py
+  8. VPC/
+    1. Amazon VPC Hands-on Lab(Design and Components).md
   README.md
 ```
 
