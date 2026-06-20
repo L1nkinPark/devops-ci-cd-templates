@@ -149,7 +149,9 @@ Các hướng dẫn thực hành xây dựng cổng API và quản lý danh tín
 |------|-------|-----------|
 | [1. Lab 1 – API Gateway sử dụng Lambda làm backend](9.%20API%20Gateway%20%26%20Cognito/1.%20Lab%201%20-%20API%20Gateway%20with%20Lambda%20Backend/1.%20Lab%201%20-%20API%20Gateway%20with%20Lambda%20Backend.md) | Xây dựng REST API trên API Gateway định tuyến và chuyển tiếp các yêu cầu tính toán sang Lambda backend xử lý (phương thức Non-Proxy Integration) | AWS API Gateway, AWS Lambda, Python 3.12 |
 | [2. Lab 2 – API Key và Usage Plan trong API Gateway](9.%20API%20Gateway%20%26%20Cognito/2.%20Lab%202%20-%20API%20Key%20and%20Usage%20Plan/2.%20Lab%202%20-%20API%20Key%20and%20Usage%20Plan.md) | Thiết lập bảo mật, giới hạn tần suất (Rate Limiting/Throttling) và hạn mức cuộc gọi (Quota) bằng API Key và Usage Plan | AWS API Gateway, Postman |
-| [3. Lab 3 – Cognito Operation Basic](9.%20API%20Gateway%20%26%20Cognito/3.%20Lab%203%20-%20Cognito%20Operation%20Basic/3.%20Lab%203%20-%20Cognito%20Operation%20Basic.md) | Khởi tạo Cognito User Pool, cấu hình thuộc tính bắt buộc, tạo tài khoản người dùng bằng quyền Admin và đăng nhập kiểm thử qua Hosted UI | AWS Cognito, Hosted UI |
+| [3. Lab 3 – Cognito Operation Basic](9.%20API%20Gateway%20%26%20Cognito/3.%20Lab%203%20-%20Cognito%20Operation%20Basic/3.%20Lab%203%20-%20Cognito%20Operation%20Basic.md) | Khởi tạo Cognito User Pool, cấu hình thuộc tính bắt buộc, tạo tài khoản người dùng bằng quyền Admin và quản lý nhóm người dùng | AWS Cognito, Admin Panel |
+| [4. Lab 4 – Sử dụng Cognito Hosted UI để login và lấy token](9.%20API%20Gateway%20%26%20Cognito/4.%20Lab%204%20-%20Cognito%20Hosted%20UI%20Login%20and%20Token/4.%20Lab%204%20-%20Cognito%20Hosted%20UI%20Login%20and%20Token.md) | Đăng nhập kiểm thử qua Hosted UI với tài khoản có sẵn và đăng ký tài khoản tự do (Self Sign-up) | AWS Cognito, Hosted UI |
+| [5. Lab 5 – Kết hợp API Gateway & Cognito](9.%20API%20Gateway%20%26%20Cognito/5.%20Lab%205%20-%20Integrate%20API%20Gateway%20and%20Cognito/5.%20Lab%205%20-%20Integrate%20API%20Gateway%20and%20Cognito.md) | Liên kết API Gateway REST API với Cognito Authorizer để xác thực token người dùng | AWS API Gateway, AWS Cognito |
 
 ---
 
@@ -227,6 +229,12 @@ cloud/aws/lab/
       README.md
     3. Lab 3 - Cognito Operation Basic/
       3. Lab 3 - Cognito Operation Basic.md
+      README.md
+    4. Lab 4 - Cognito Hosted UI Login and Token/
+      4. Lab 4 - Cognito Hosted UI Login and Token.md
+      README.md
+    5. Lab 5 - Integrate API Gateway and Cognito/
+      5. Lab 5 - Integrate API Gateway and Cognito.md
       README.md
   README.md
 ```
