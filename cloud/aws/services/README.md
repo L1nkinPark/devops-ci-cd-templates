@@ -17,12 +17,12 @@ Thư mục này mô tả các dịch vụ AWS thường được sử dụng tro
 | 07 | [AWS Lambda (Serverless Compute)](7.%20AWS%20Lambda/1.%20AWS%20Lambda%20Overview.md) | Dịch vụ tính toán Serverless (Serverless Compute) |
 | 08 | [VPC (Virtual Private Cloud)](8. VPC/1. VPC Overview.md) | Mạng ảo dùng riêng (Virtual Private Cloud) |
 | 09 | [API Gateway & Cognito](9.%20API%20Gateway%20&%20Cognito/1.%20Amazon%20API%20Gateway%20Overview.md) | Quản lý API & Định danh người dùng (API Gateway & Identity) |
-| 10 | [EKS (Elastic Kubernetes Service)](10.%20EKS.md) | Dịch vụ Kubernetes được quản lý (Managed Kubernetes) |
-| 11 | [ECS (Elastic Container Service)](11.%20ECS.md) | Điều phối container (Container Orchestration) |
-| 12 | [ECR (Elastic Container Registry)](12.%20ECR.md) | Kho lưu trữ Docker image (Docker Registry) |
-| 13 | [CodePipeline / CodeBuild / CodeDeploy](13.%20CodePipeline.md) | Bộ dịch vụ CI/CD nguyên bản của AWS (Pipeline) |
-| 14 | [Route 53](14.%20Route%2053.md) | Hệ thống phân giải tên miền (DNS) |
-| 15 | [CloudFront](15.%20CloudFront.md) | Mạng phân phối nội dung (CDN) |
+| 10 | [CloudFront (Amazon CloudFront)](10.%20CloudFront/1.%20Amazon%20CloudFront%20Overview.md) | Mạng phân phối nội dung (CDN) |
+| 11 | [EKS (Elastic Kubernetes Service)](11.%20EKS.md) | Dịch vụ Kubernetes được quản lý (Managed Kubernetes) |
+| 12 | [ECS (Elastic Container Service)](12.%20ECS.md) | Điều phối container (Container Orchestration) |
+| 13 | [ECR (Elastic Container Registry)](13.%20ECR.md) | Kho lưu trữ Docker image (Docker Registry) |
+| 14 | [CodePipeline / CodeBuild / CodeDeploy](14.%20CodePipeline.md) | Bộ dịch vụ CI/CD nguyên bản của AWS (Pipeline) |
+| 15 | [Route 53](15.%20Route%2053.md) | Hệ thống phân giải tên miền (DNS) |
 | 16 | [ACM (Certificate Manager)](16.%20ACM.md) | Quản lý chứng chỉ bảo mật TLS/SSL (ACM) |
 | 17 | [EFS (Elastic File System)](17.%20EFS.md) | Hệ thống tệp lưu trữ dùng chung (Shared Storage) |
 
