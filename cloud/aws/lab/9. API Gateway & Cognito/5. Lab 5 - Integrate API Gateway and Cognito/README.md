@@ -67,43 +67,59 @@ Mọi cấu hình trên API Gateway chỉ thực sự có hiệu lực sau khi b
 
 ### Bước 4: Kiểm thử và xác minh tích hợp bằng Postman
 
-Bây giờ API của bạn đã được bảo vệ kép bởi **API Key** và **Cognito Authorizer (JWT Token)**. Chúng ta sẽ dùng Postman để kiểm chứng:
+Bây giờ API của bạn đã được bảo vệ bởi **Cognito Authorizer (JWT Token)**. Chúng ta sẽ lấy URL gọi API và tiến hành kiểm thử qua Postman.
 
-#### 1. Kiểm thử khi không truyền Token (hoặc Token không hợp lệ)
-1. Mở Postman, cấu hình request POST gửi tới API Gateway Invoke URL (ví dụ: `https://da0brxb62b.execute-api.us-east-1.amazonaws.com/dev/calculate`).
-2. Đính kèm API Key vào Header `x-api-key`.
-3. Nhấn **Send** khi **không** đính kèm Header `authorization`.
-4. **Kết quả**: API Gateway lập tức từ chối request và trả về mã lỗi **`401 Unauthorized`** kèm body:
+#### 1. Lấy API Invoke URL
+1. Trong menu bên trái của API Gateway, chọn mục **Stages**.
+2. Click chọn stage **`dev`** -> Tìm đến phương thức **`POST`** của `/calculate`.
+3. Sao chép địa chỉ **Invoke URL** hiển thị trên màn hình (địa chỉ dạng: `https://da0brxb62b.execute-api.us-east-1.amazonaws.com/dev/calculate`).
+
+![Sao chép Invoke URL từ stage dev](../../../../../images/aws/apigw_cognito_invoke_url.png)
+
+#### 2. Kiểm thử khi KHÔNG truyền Token (Xác minh chặn quyền truy cập)
+1. Mở Postman, tạo một request mới với phương thức **POST** và dán địa chỉ **Invoke URL** vừa copy ở trên.
+2. Tại tab **Body**, chọn kiểu **raw** -> **JSON** và nhập nội dung tính toán (ví dụ: phép tính cộng):
+   ```json
+   {
+       "firstName": 5,
+       "secondNum": 25,
+       "operator": "ADD"
+   }
+   ```
+3. Nhấn **Send** khi **không** đính kèm bất kỳ thông tin xác thực nào trong Header hay Authorization.
+4. **Kết quả**: API Gateway lập tức chặn lại và trả về mã lỗi **`401 Unauthorized`** cùng nội dung phản hồi:
    ```json
    {
        "message": "Unauthorized"
    }
    ```
-   *(Lambda backend hoàn toàn không bị kích hoạt trong trường hợp này, giúp bạn tiết kiệm chi phí tính toán).*
+   *(Nhờ cơ chế chặn ở biên, Lambda backend của bạn không bị kích hoạt vô ích, giúp tối ưu chi phí).*
 
-#### 2. Kiểm thử khi truyền ID Token hợp lệ
-1. Mở file [id_token.txt](../4.%20Lab%204%20-%20Cognito%20Hosted%20UI%20Login%20and%20Token/id_token.txt) được tạo từ Lab 4 và sao chép toàn bộ chuỗi token dài bên trong.
-2. Quay lại Postman, trong phần **Headers** của request, thêm một header mới:
-   * **Key**: `authorization`
-   * **Value**: Dán toàn bộ chuỗi ID Token vừa copy ở trên.
-3. Gửi kèm Request Body (ví dụ: phép tính cộng):
+![Kiểm thử gọi API không kèm Token trả về lỗi 401](../../../../../images/aws/apigw_cognito_postman_unauthorized.png)
+
+#### 3. Kiểm thử khi truyền ID Token hợp lệ (Xác minh cấp quyền truy cập)
+1. Mở file [id_token.txt](../4.%20Lab%204%20-%20Cognito%20Hosted%20UI%20Login%20and%20Token/id_token.txt) ở Lab trước và sao chép toàn bộ chuỗi Token.
+2. Trong Postman, di chuyển sang tab **Authorization**:
+   * **Auth Type**: Chọn **Bearer Token**.
+   * **Token**: Dán chuỗi ID Token vừa sao chép ở bước trên.
+   *(Lưu ý: Postman sẽ tự động sinh ra header `Authorization` chứa chuỗi token gửi lên API Gateway).*
+3. Nhấn nút **Send**.
+4. **Kết quả**: API Gateway xác thực Token hợp lệ từ Cognito và chuyển tiếp yêu cầu xuống Lambda backend. Hệ thống xử lý thành công, trả về mã trạng thái **`200 OK`** cùng dữ liệu phản hồi từ Lambda:
    ```json
    {
-       "a": 15,
-       "b": 25,
-       "op": "+"
+       "statusCode": 200,
+       "body": "{\"message\": \"Request processed successfully\", \"result\": 30}",
+       "headers": {
+           "Content-Type": "application/json"
+       }
    }
    ```
-4. Nhấn **Send**.
-5. **Kết quả**: API Gateway xác thực thành công ID Token từ Cognito, chuyển tiếp request xuống Lambda backend xử lý. Bạn sẽ nhận được mã phản hồi **`200 OK`** cùng kết quả trả về chính xác:
-   ```json
-   {
-       "result": 40"
-   }
-   ```
+
+![Kiểm thử thành công khi đính kèm ID Token](../../../../../images/aws/apigw_cognito_postman_authorized.png)
 
 > [!NOTE]
-> Trong AWS API Gateway, khi cấu hình `Token source` là `method.request.header.authorization`, mặc định hệ thống sẽ kiểm tra chuỗi token thô (Raw JWT). Do đó trong Postman bạn chỉ cần truyền trực tiếp chuỗi token vào ô Value của header `authorization` (không cần tiền tố `Bearer ` trừ khi bạn cấu hình kiểm tra Regex cho trường Token validation).
+> Khi cấu hình **Token source** là `method.request.header.authorization`, API Gateway sẽ trích xuất token từ header `authorization` (Postman tự sinh ra header này khi bạn sử dụng tab Authorization với kiểu Bearer Token). Hãy đảm bảo ID Token của bạn còn trong thời gian hiệu lực (thường là 60 phút từ khi sinh ra) để việc xác thực diễn ra thành công.
+
 
 ---
 
