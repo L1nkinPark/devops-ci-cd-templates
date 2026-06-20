@@ -111,10 +111,12 @@ authorization_code = 'efb0a37f-e771-4bda-ad6d-500af9dc9ea1'
    python ./exchange-token.py
    ```
 
-4. **Kết quả trả về:** Khi mã code hợp lệ và chưa hết hạn, script sẽ gửi request POST tới Cognito Token Endpoint và in ra màn hình 3 loại token:
-   * **ID Token:** Chứa thông tin hồ sơ của người dùng (name, email, v.v.).
-   * **Access Token:** Dùng để xác thực quyền truy cập đối với các API hoặc dịch vụ backend.
-   * **Refresh Token:** Dùng để lấy Access Token mới khi Access Token cũ hết hạn mà không bắt người dùng đăng nhập lại.
+4. **Kết quả trả về:** Khi mã code hợp lệ và chưa hết hạn, script sẽ gửi request POST tới Cognito Token Endpoint, lưu toàn bộ nội dung token vào các file text tương ứng để bạn dễ dàng sử dụng sau này, và hiển thị bản xem trước rút gọn (preview) trên terminal:
+   * **`id_token.txt`**: Lưu trữ ID Token (chứa thông tin profile như email, name, v.v.).
+   * **`access_token.txt`**: Lưu trữ Access Token (dùng để đính kèm làm Bearer Auth gọi API Gateway).
+   * **`refresh_token.txt`**: Lưu trữ Refresh Token (dùng để xin cấp lại Access Token mới).
+
+   *Đồng thời, bạn sẽ thấy thông báo đổi thành công dạng rút gọn trên màn hình để tránh làm tràn dòng hoặc đè dòng trên giao diện dòng lệnh.*
 
 ---
 
