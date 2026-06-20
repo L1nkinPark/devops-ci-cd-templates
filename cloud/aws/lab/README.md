@@ -149,6 +149,7 @@ Các hướng dẫn thực hành xây dựng cổng API và quản lý danh tín
 |------|-------|-----------|
 | [1. Lab 1 – API Gateway sử dụng Lambda làm backend](9.%20API%20Gateway%20%26%20Cognito/1.%20Lab%201%20-%20API%20Gateway%20with%20Lambda%20Backend/1.%20Lab%201%20-%20API%20Gateway%20with%20Lambda%20Backend.md) | Xây dựng REST API trên API Gateway định tuyến và chuyển tiếp các yêu cầu tính toán sang Lambda backend xử lý (phương thức Non-Proxy Integration) | AWS API Gateway, AWS Lambda, Python 3.12 |
 | [2. Lab 2 – API Key và Usage Plan trong API Gateway](9.%20API%20Gateway%20%26%20Cognito/2.%20Lab%202%20-%20API%20Key%20and%20Usage%20Plan/2.%20Lab%202%20-%20API%20Key%20and%20Usage%20Plan.md) | Thiết lập bảo mật, giới hạn tần suất (Rate Limiting/Throttling) và hạn mức cuộc gọi (Quota) bằng API Key và Usage Plan | AWS API Gateway, Postman |
+| [3. Lab 3 – Cognito Operation Basic](9.%20API%20Gateway%20%26%20Cognito/3.%20Lab%203%20-%20Cognito%20Operation%20Basic/3.%20Lab%203%20-%20Cognito%20Operation%20Basic.md) | Khởi tạo Cognito User Pool, cấu hình thuộc tính bắt buộc, tạo tài khoản người dùng bằng quyền Admin và đăng nhập kiểm thử qua Hosted UI | AWS Cognito, Hosted UI |
 
 ---
 
@@ -223,6 +224,9 @@ cloud/aws/lab/
       calculator-lambda.py
     2. Lab 2 - API Key and Usage Plan/
       2. Lab 2 - API Key and Usage Plan.md
+      README.md
+    3. Lab 3 - Cognito Operation Basic/
+      3. Lab 3 - Cognito Operation Basic.md
       README.md
   README.md
 ```
