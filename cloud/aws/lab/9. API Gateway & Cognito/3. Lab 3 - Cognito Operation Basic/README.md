@@ -74,6 +74,61 @@ AWS Cognito cung cấp sẵn một trang web giao diện đăng nhập (Hosted U
 
 ---
 
+### Bước 4: Đăng ký tài khoản thông thường (Self Sign-up)
+
+Bên cạnh việc admin tạo user thủ công, Cognito cũng hỗ trợ giao diện đăng ký tự động (Self Sign-up) cho người dùng bên ngoài:
+
+1. Từ trang đăng nhập Hosted UI của Cognito (được mở ở Bước 3), click chọn liên kết **Sign up** ở dưới cùng.
+2. Nhập các thông tin đăng ký cho tài khoản mới:
+   * **Username**: `h1eudayne2`
+   * **Email address**: `voduchieu43@gmail.com`
+   * **Name**: `Vo Duc Hieu`
+   * **Password / Confirm password**: Thiết lập mật khẩu thỏa mãn các quy tắc bảo mật của Cognito (được tích xanh toàn bộ).
+3. Click chọn **Sign up** để đăng ký.
+
+![Giao diện Sign Up của Cognito Hosted UI](../../../../../images/aws/cognito_signup_ui.png)
+
+*Lưu ý:* Sau khi nhấn Sign up, tài khoản tự đăng ký này sẽ mặc định ở trạng thái `UNCONFIRMED` (chưa được xác thực) cho tới khi nhập mã OTP xác thực được gửi đến email đăng ký.
+
+---
+
+### Bước 5: Tạo Group và Thêm User vào Group
+
+Group (Nhóm) trong Cognito giúp gom cụm người dùng để phân quyền truy cập thông qua IAM Role hoặc token claims.
+
+1. Quay lại trang quản trị User Pool **`test-user-pool-01`** trên AWS Console.
+2. Chọn mục **Groups** ở thanh danh mục bên trái (trong mục *User management*).
+3. Click chọn nút **Create group**.
+
+![Giao diện quản lý Groups trống](../../../../../images/aws/cognito_groups_list.png)
+
+4. Cấu hình chi tiết cho Group mới:
+   * **Group name**: Nhập `normal_group`.
+   * **Description**: Nhập `normal user`.
+   * **Precedence**: Nhập `1` (Mức độ ưu tiên để Cognito xác định group chính khi người dùng thuộc nhiều group).
+   * **IAM role**: Để trống hoặc chọn mặc định (ở đây ta chưa cần gán IAM role).
+5. Click chọn nút **Create group** ở góc dưới cùng bên phải.
+
+![Biểu mẫu tạo group mới](../../../../../images/aws/cognito_create_group.png)
+
+6. Sau khi tạo thành công, click vào group **`normal_group`** vừa tạo.
+7. Click chọn nút **Add user to group** (Thêm người dùng vào nhóm).
+
+![Trang chi tiết Group normal_group](../../../../../images/aws/cognito_group_details.png)
+
+8. Trong bảng danh sách người dùng hiển thị:
+   * Tích chọn người dùng **`h1eudayne`** (trạng thái `Confirmed`).
+   * Click chọn nút **Add** ở góc dưới cùng bên phải.
+
+![Chọn user và add vào group](../../../../../images/aws/cognito_add_user_to_group.png)
+
+> [!NOTE]
+> **Một số lưu ý quan trọng về Cognito Group:**
+> - **Không hỗ trợ nhóm lồng nhau (No nested groups):** Amazon Cognito không hỗ trợ cấu trúc nhóm con bên trong nhóm cha. Tất cả các nhóm đều nằm ở mức độ ngang hàng nhau trong cùng một User Pool.
+> - AWS cho phép tích hợp Group với **Amazon Verified Permissions** để thực hiện phân quyền chi tiết (fine-grained authorization) cho các API trên API Gateway.
+
+---
+
 * **Bài trước**: [2. Lab 2 – API Key và Usage Plan trong API Gateway](../2.%20Lab%202%20-%20API%20Key%20and%20Usage%20Plan/2.%20Lab%202%20-%20API%20Key%20and%20Usage%20Plan.md)
 * **Bài tiếp theo**: Sắp ra mắt (Coming soon...)
 
