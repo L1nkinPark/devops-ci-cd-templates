@@ -153,6 +153,15 @@ Các hướng dẫn thực hành xây dựng cổng API và quản lý danh tín
 | [4. Lab 4 – Sử dụng Cognito Hosted UI để login và lấy token](9.%20API%20Gateway%20%26%20Cognito/4.%20Lab%204%20-%20Cognito%20Hosted%20UI%20Login%20and%20Token/4.%20Lab%204%20-%20Cognito%20Hosted%20UI%20Login%20and%20Token.md) | Đăng nhập kiểm thử qua Hosted UI với tài khoản có sẵn và đăng ký tài khoản tự do (Self Sign-up) | AWS Cognito, Hosted UI |
 | [5. Lab 5 – Kết hợp API Gateway & Cognito](9.%20API%20Gateway%20%26%20Cognito/5.%20Lab%205%20-%20Integrate%20API%20Gateway%20and%20Cognito/5.%20Lab%205%20-%20Integrate%20API%20Gateway%20and%20Cognito.md) | Liên kết API Gateway REST API với Cognito Authorizer để xác thực token người dùng | AWS API Gateway, AWS Cognito |
 
+### 13. Hướng dẫn thực hành CloudFront (CloudFront Hands-on Labs)
+
+Các hướng dẫn thực hành phân phối nội dung tĩnh và động toàn cầu bằng Amazon CloudFront CDN:
+
+| File | Mô tả | Công nghệ |
+|------|-------|-----------|
+| [1. Lab 1 – Sử dụng CloudFront kết hợp với S3](10.%20CloudFront/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3.md) | Cấu hình CloudFront phân phối static website từ S3 bucket private sử dụng Origin Access Control (OAC) và cập nhật Bucket Policy | AWS CloudFront, AWS S3, OAC, Bucket Policy |
+| [2. Lab 2 – Sử dụng CloudFront kết hợp với API Gateway and S3](10.%20CloudFront/2.%20Lab%202%20-%20Integrate%20CloudFront%20with%20API%20Gateway%20and%20S3/2.%20Lab%202%20-%20Integrate%20CloudFront%20with%20API%20Gateway%20and%20S3.md) | Cấu hình CloudFront Multi-Origin phân luồng định tuyến tĩnh (S3) và động (API Gateway) qua Cache Behaviors, Cache Policy và Origin Request Policy | AWS CloudFront, AWS API Gateway, Multi-Origin, CachingDisabled, AllViewer |
+
 ---
 
 ## Cấu trúc khuyến nghị
@@ -235,6 +244,13 @@ cloud/aws/lab/
       README.md
     5. Lab 5 - Integrate API Gateway and Cognito/
       5. Lab 5 - Integrate API Gateway and Cognito.md
+      README.md
+  10. CloudFront/
+    1. Lab 1 - Integrate CloudFront with S3/
+      1. Lab 1 - Integrate CloudFront with S3.md
+      README.md
+    2. Lab 2 - Integrate CloudFront with API Gateway and S3/
+      2. Lab 2 - Integrate CloudFront with API Gateway and S3.md
       README.md
   README.md
 ```
