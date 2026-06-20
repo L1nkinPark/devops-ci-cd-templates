@@ -8,25 +8,28 @@ Thư mục này lưu trữ các mẫu cấu hình chính sách (Policies) dạng
 
 ```text
 templates/
-├── s3/                              # Các cấu hình cho dịch vụ Amazon S3
-│   ├── public-read-policy.json      # Cấp quyền đọc công khai (GetObject)
-│   ├── enforce-https-policy.json    # Bắt buộc kết nối HTTPS bảo mật (Deny HTTP)
-│   ├── ip-restriction-policy.json   # Chỉ cho phép truy cập từ dải IP định sẵn
-│   ├── allow-user-read-policy.json  # Cho phép một IAM User cụ thể đọc dữ liệu
-│   ├── deny-user-all-policy.json    # Chặn hoàn toàn truy cập của một IAM User
-│   ├── cors-policy.json             # Cấu hình chia sẻ tài nguyên nguồn chéo CORS
-│   └── event-notification-payload.json # Cấu trúc JSON payload của S3 Event Notification
-│
-├── iam/                             # Các cấu hình cho dịch vụ AWS IAM
-│   ├── enforce-mfa-policy.json      # Bắt buộc xác thực MFA đối với mọi API
-│   ├── role-trust-policy-ec2.json   # Trust Policy cho phép EC2 assume role
-│   └── iam-policy-ip-restriction.json # IAM Policy giới hạn quyền truy cập theo địa chỉ IP
-│
-├── elb/                             # Các cấu hình cho dịch vụ Elastic Load Balancing
-│   ├── user-data-instance-a.sh      # Script User Data khởi tạo Instance A (giao diện màu Blue)
-│   └── user-data-instance-b.sh      # Script User Data khởi tạo Instance B (giao diện màu Green)
-│
-└── README.md                        # (file này)
+ s3/                              # Các cấu hình cho dịch vụ Amazon S3
+    public-read-policy.json      # Cấp quyền đọc công khai (GetObject)
+    enforce-https-policy.json    # Bắt buộc kết nối HTTPS bảo mật (Deny HTTP)
+    ip-restriction-policy.json   # Chỉ cho phép truy cập từ dải IP định sẵn
+    allow-user-read-policy.json  # Cho phép một IAM User cụ thể đọc dữ liệu
+    deny-user-all-policy.json    # Chặn hoàn toàn truy cập của một IAM User
+    cors-policy.json             # Cấu hình chia sẻ tài nguyên nguồn chéo CORS
+    event-notification-payload.json # Cấu trúc JSON payload của S3 Event Notification
+
+ iam/                             # Các cấu hình cho dịch vụ AWS IAM
+    enforce-mfa-policy.json      # Bắt buộc xác thực MFA đối với mọi API
+    role-trust-policy-ec2.json   # Trust Policy cho phép EC2 assume role
+    iam-policy-ip-restriction.json # IAM Policy giới hạn quyền truy cập theo địa chỉ IP
+
+ elb/                             # Các cấu hình cho dịch vụ Elastic Load Balancing
+    user-data-instance-a.sh      # Script User Data khởi tạo Instance A (giao diện màu Blue)
+    user-data-instance-b.sh      # Script User Data khởi tạo Instance B (giao diện màu Green)
+
+ rds/                             # Các mẫu mã lệnh SQL cho dịch vụ Amazon RDS
+    employee_crud_slow_query.sql # File script SQL kiểm thử CRUD và giả lập Slow Query
+
+ README.md                        # (file này)
 ```
 
 ---
@@ -50,3 +53,6 @@ templates/
 ### 3. Amazon ELB Templates (`templates/elb/`)
 *   **[user-data-instance-a.sh](elb/user-data-instance-a.sh)**: Script cài đặt máy chủ web Apache và cấu hình giao diện Instance A (tiêu đề xanh dương, hiển thị IP Private/Public động qua IMDSv2).
 *   **[user-data-instance-b.sh](elb/user-data-instance-b.sh)**: Script cài đặt máy chủ web Apache và cấu hình giao diện Instance B (tiêu đề xanh lá, hiển thị IP Private/Public động qua IMDSv2).
+
+### 4. Amazon RDS Templates (`templates/rds/`)
+*   **[employee_crud_slow_query.sql](rds/employee_crud_slow_query.sql)**: Mẫu mã lệnh SQL phục vụ cho bài thực hành RDS bao gồm các câu lệnh tạo database/table, CRUD dữ liệu mẫu và định nghĩa thủ tục `iterateSleep` để giả lập các Slow Query phục vụ kiểm thử giám sát.

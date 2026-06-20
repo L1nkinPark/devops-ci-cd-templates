@@ -14,7 +14,9 @@ permissions:
 
 jobs:
   build-and-deploy:
-    concurrency: ci-${{ github.ref }}
+    concurrency:
+      group: github-pages-deploy
+      cancel-in-progress: true
     runs-on: ubuntu-latest
 
     steps:
@@ -51,3 +53,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./web/dist
           publish_branch: gh-pages
+          force_orphan: true
