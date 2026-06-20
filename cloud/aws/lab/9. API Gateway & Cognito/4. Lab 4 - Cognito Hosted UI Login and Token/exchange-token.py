@@ -5,7 +5,7 @@ client_id = '23k9b82pf42m1nv9gslab0b70h'
 client_secret = '1t6g4lial29aloo5i4g5hsqb8puskogo6k2kb629nf9ddpebfruv'
 redirect_uri = 'https://h1eudayne.dev'
 token_endpoint = 'https://us-east-1tpt9lktih.auth.us-east-1.amazoncognito.com/oauth2/token'
-authorization_code = 'efb0a37f-e771-4bda-ad6d-500af9dc9ea1'
+authorization_code = '96e9936a-0a48-44da-80b7-0da06df76949'
 
 # Encode the client ID and client secret
 client_credentials = f"{client_id}:{client_secret}"
@@ -32,8 +32,21 @@ if response.status_code == 200:
     id_token = tokens.get('id_token')
     access_token = tokens.get('access_token')
     refresh_token = tokens.get('refresh_token')
-    print('ID Token:', id_token)
-    print('Access Token:', access_token)
-    print('Refresh Token:', refresh_token)
+    
+    # Save to files
+    with open('id_token.txt', 'w', encoding='utf-8') as f:
+        f.write(id_token or '')
+    with open('access_token.txt', 'w', encoding='utf-8') as f:
+        f.write(access_token or '')
+    with open('refresh_token.txt', 'w', encoding='utf-8') as f:
+        f.write(refresh_token or '')
+        
+    print('=== ĐỔI TOKEN THÀNH CÔNG ===')
+    print('1. ID Token (Lưu tại id_token.txt):')
+    print(f'   {id_token[:20]}...{id_token[-20:] if id_token else ""}')
+    print('2. Access Token (Lưu tại access_token.txt):')
+    print(f'   {access_token[:20]}...{access_token[-20:] if access_token else ""}')
+    print('3. Refresh Token (Lưu tại refresh_token.txt):')
+    print(f'   {refresh_token[:20]}...{refresh_token[-20:] if refresh_token else ""}')
 else:
     print('Failed to exchange authorization code for tokens:', response.text)
