@@ -8,4 +8,4 @@ build/
 node_modules/
 python/
 *.zip
-
+cloud/aws/lab/9. API Gateway & Cognito/4. Lab 4 - Cognito Hosted UI Login and Token/*_token.txt

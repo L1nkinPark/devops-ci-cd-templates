@@ -6,42 +6,117 @@
 
 ## Các bước thực hiện chi tiết
 
-### Bước 1: Thử nghiệm Đăng nhập bằng Hosted UI của Cognito
+### Bước 1: Tạo App Client mới cho User Pool
 
-AWS Cognito cung cấp sẵn một trang web giao diện đăng nhập (Hosted UI) giúp bạn dễ dàng tích hợp và thử nghiệm mà không cần tự code frontend:
+Để ứng dụng của bạn có thể giao tiếp với Cognito và thực hiện đăng nhập, bạn cần khởi tạo một App Client:
 
-1. Đăng nhập vào AWS Management Console, tìm kiếm và truy cập dịch vụ **Cognito**.
-2. Click chọn User Pool **`test-user-pool-01`** đã tạo từ Lab 3.
-3. Tại menu danh mục bên trái, chọn **App clients** dưới phần *Applications*.
-4. Click chọn App client tương ứng của bạn.
-5. Chuyển sang tab **Login pages** trong phần thông tin App client.
-6. Tại khu vực *Managed login pages configuration*, click chọn nút **View login page** để mở trang đăng nhập được Cognito hosted tự động.
+1. Đăng nhập vào AWS Management Console, truy cập dịch vụ **Cognito** và click chọn User Pool **`test-user-pool-01`** đã tạo ở Lab 3.
+2. Chọn mục **App clients** ở menu bên trái (dưới mục *Applications*) -> Click chọn **Create app client**.
+3. Cấu hình thông số App Client mới:
+   * **Application type**: Chọn **Traditional web application** (Ứng dụng web truyền thống sử dụng redirect và client secret).
+   * **Name your application**: Nhập `test-hosted-ui`.
+   * **Return URL (Redirect URI)**: Nhập `https://h1eudayne.dev` (Đây là địa chỉ trang web cá nhân của bạn, nơi Cognito chuyển hướng về kèm theo `code` sau khi đăng nhập thành công).
+   * **Client secret configuration**: Tích chọn **Automatically generate a new client secret** để hệ thống tự động sinh khóa bí mật.
+4. Click chọn nút **Create app client** để lưu cấu hình.
 
-![Vị trí nút View login page trong cấu hình App client](../../../../../images/aws/cognito_app_client_login.png)
-
-7. Tại trang web đăng nhập vừa mở ra:
-   * Nhập **Username** (`h1eudayne`) và **Mật khẩu tạm thời** bạn đã đặt từ Lab trước.
-   * Nhấp chọn **Sign In**.
-   * Hệ thống sẽ yêu cầu bạn đổi mật khẩu mới trong lần đầu tiên đăng nhập. Nhập mật khẩu mới và xác nhận.
-   * Sau khi đổi mật khẩu thành công, trình duyệt sẽ tự động chuyển hướng (redirect) về địa chỉ URL bạn đã cấu hình (`https://h1eudayne.dev`) kèm theo chuỗi query parameter chứa mã xác thực/token trên thanh URL (ví dụ: `?code=xxxx-xxxx-xxxx-xxxx`).
+![Giao diện khởi tạo App client mới](../../../../../images/aws/cognito_create_app_client.png)
 
 ---
 
-### Bước 2: Đăng ký tài khoản thông thường (Self Sign-up)
+### Bước 2: Chỉnh sửa cấu hình App Client (Edit App Client Settings)
 
-Bên cạnh việc admin tạo user thủ công, Cognito cũng hỗ trợ giao diện đăng ký tự động (Self Sign-up) cho người dùng bên ngoài:
+Sau khi khởi tạo, bạn cần điều chỉnh các cơ chế dòng chảy xác thực (Authentication flows) và thời gian sống của token:
 
-1. Từ trang đăng nhập Hosted UI của Cognito (được mở ở Bước 1), click chọn liên kết **Sign up** ở dưới cùng.
-2. Nhập các thông tin đăng ký cho tài khoản mới:
-   * **Username**: `h1eudayne2`
-   * **Email address**: `voduchieu43@gmail.com`
-   * **Name**: `Vo Duc Hieu`
-   * **Password / Confirm password**: Thiết lập mật khẩu thỏa mãn các quy tắc bảo mật của Cognito (được tích xanh toàn bộ).
-3. Click chọn **Sign up** để đăng ký.
+1. Tại danh sách App clients, click chọn App client **`test-hosted-ui`** vừa tạo.
+2. Click chọn nút **Edit** tại mục *App client information*.
+3. Tiến hành kiểm tra và cấu hình các mục sau:
+   * **Authentication flows**: Đảm bảo đã tích chọn các luồng:
+     * `ALLOW_USER_AUTH`
+     * `ALLOW_USER_PASSWORD_AUTH`
+     * `ALLOW_USER_SRP_AUTH`
+     * `ALLOW_REFRESH_TOKEN_AUTH`
+   * **Token expiration**: Cấu hình thời gian hết hạn của token:
+     * **Refresh token expiration**: `5` days.
+     * **Access token expiration**: `480` minutes (8 tiếng).
+     * **ID token expiration**: `480` minutes (8 tiếng).
+   * Tích chọn **Prevent user existence errors** để bảo mật hệ thống.
+4. Nhấn **Save changes** để hoàn tất chỉnh sửa.
 
-![Giao diện Sign Up của Cognito Hosted UI](../../../../../images/aws/cognito_signup_ui.png)
+![Giao diện chỉnh sửa thông số App client](../../../../../images/aws/cognito_edit_app_client.png)
 
-*Lưu ý:* Sau khi nhấn Sign up, tài khoản tự đăng ký này sẽ mặc định ở trạng thái `UNCONFIRMED` (chưa được xác thực) cho tới khi nhập mã OTP xác thực được gửi đến email đăng ký.
+---
+
+### Bước 3: Sửa lỗi "Login pages unavailable" (Nếu gặp phải)
+
+Khi click chọn **View login page** để mở Hosted UI, nếu bạn gặp phải thông báo lỗi màu đỏ:
+```text
+Login pages unavailable
+Please contact an administrator.
+```
+
+![Lỗi Login pages unavailable](../../../../../images/aws/cognito_login_pages_unavailable.png)
+
+#### Nguyên nhân & Cách khắc phục:
+Lỗi này xảy ra khi Cognito User Pool chưa được cấu hình tên miền (Domain) hoặc App Client chưa được bật nhà cung cấp định danh (Identity Provider).
+
+1. **Cấu hình Domain cho User Pool:**
+   * Trong giao diện quản lý User Pool, truy cập tab **App integration** (Tích hợp ứng dụng).
+   * Cuộn xuống phần **Domain** -> Chọn **Actions** -> Click chọn **Create Cognito domain**.
+   * Nhập một tiền tố tên miền duy nhất (ví dụ: `your-domain-prefix`) và lưu lại.
+2. **Kích hoạt Identity Provider cho App Client:**
+   * Truy cập tab **App integration** -> Cuộn xuống mục **App clients and analytics** -> Click chọn App client `test-hosted-ui`.
+   * Tại tab **Login pages**, click chọn **Edit** tại mục *Managed login pages configuration*.
+   * Trong phần **Identity providers**, đảm bảo bạn đã tích chọn **Cognito user pool directory** (đây là thư mục tài khoản cục bộ của bạn).
+   * Nhấn **Save changes** và thử click lại **View login page** để mở Hosted UI.
+
+---
+
+### Bước 4: Đăng nhập Hosted UI và lấy Authorization Code
+
+Khi Hosted UI hiển thị chính xác trang đăng nhập:
+
+1. Click chọn **Sign in as h1eudayne** (nếu trình duyệt đã ghi nhớ phiên đăng nhập trước đó) hoặc nhập tài khoản `h1eudayne` kèm mật khẩu đã thiết lập ở Lab 3.
+
+![Hosted UI đăng nhập Cognito](../../../../../images/aws/cognito_hosted_ui_signin.png)
+
+2. Đăng nhập thành công, trình duyệt sẽ tự động chuyển hướng về trang web cá nhân của bạn (`https://h1eudayne.dev`).
+3. Quan sát thanh địa chỉ (Address bar) của trình duyệt để lấy mã **Authorization Code** nằm sau tham số `?code=` (Mã này có dạng tương tự như: `efb0a37f-e771-4bda-ad6d-500af9dc9ea1`).
+
+![Trích xuất Authorization Code từ thanh địa chỉ URL](../../../../../images/aws/cognito_vscode_redirect_code.png)
+
+---
+
+### Bước 5: Đổi Authorization Code lấy JWT Tokens qua script Python
+
+Vì mã `code` trên URL chỉ có thời hạn sử dụng 1 lần duy nhất trong vòng 5-10 phút, bạn cần thực hiện đổi (exchange) nó lấy các JSON Web Tokens (JWT) thông qua API OAuth2:
+
+1. Mở file [exchange-token.py](exchange-token.py) có sẵn trong thư mục bài Lab này.
+2. Tiến hành thay thế các tham số cấu hình bằng thông tin thực tế từ tài khoản AWS của bạn:
+   * **`client_id`**: Client ID của App client `test-hosted-ui`.
+   * **`client_secret`**: Client secret nhận được từ App client `test-hosted-ui`.
+   * **`redirect_uri`**: Redirect URI bạn đã cấu hình (`https://h1eudayne.dev`).
+   * **`token_endpoint`**: Đường dẫn Token endpoint của Cognito (Có dạng `https://<your-cognito-domain>.auth.<region>.amazoncognito.com/oauth2/token`).
+   * **`authorization_code`**: Dán mã Code bạn vừa sao chép từ URL ở Bước 4 vào đây.
+
+```python
+client_id = '23k9b82pf42m1nv9gslab0b70h'
+client_secret = '1t6g4lial29aloo5i4g5hsqb8puskogo6k2kb629nf9ddpebfruv'
+redirect_uri = 'https://h1eudayne.dev'
+token_endpoint = 'https://us-east-1tpt9lktih.auth.us-east-1.amazoncognito.com/oauth2/token'
+authorization_code = 'efb0a37f-e771-4bda-ad6d-500af9dc9ea1'
+```
+
+3. Mở terminal tại thư mục bài Lab và chạy file script Python:
+   ```bash
+   python ./exchange-token.py
+   ```
+
+4. **Kết quả trả về:** Khi mã code hợp lệ và chưa hết hạn, script sẽ gửi request POST tới Cognito Token Endpoint, lưu toàn bộ nội dung token vào các file text tương ứng để bạn dễ dàng sử dụng sau này, và hiển thị bản xem trước rút gọn (preview) trên terminal:
+   * **`id_token.txt`**: Lưu trữ ID Token (chứa thông tin profile như email, name, v.v.).
+   * **`access_token.txt`**: Lưu trữ Access Token (dùng để đính kèm làm Bearer Auth gọi API Gateway).
+   * **`refresh_token.txt`**: Lưu trữ Refresh Token (dùng để xin cấp lại Access Token mới).
+
+   *Đồng thời, bạn sẽ thấy thông báo đổi thành công dạng rút gọn trên màn hình để tránh làm tràn dòng hoặc đè dòng trên giao diện dòng lệnh.*
 
 ---
 
