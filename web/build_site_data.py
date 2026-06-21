@@ -3,6 +3,13 @@ import json
 import shutil
 import re
 import urllib.parse
+import sys
+
+# Reconfigure stdout to use UTF-8 to prevent UnicodeEncodeError on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
 
 # Set paths relative to script location
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) # web/

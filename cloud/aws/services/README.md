@@ -16,14 +16,15 @@ Thư mục này mô tả các dịch vụ AWS thường được sử dụng tro
 | 06 | [DynamoDB (Amazon DynamoDB)](6. DynamoDB/1. NoSQL Overview.md) | Cơ sở dữ liệu NoSQL được quản lý (Managed NoSQL Database) |
 | 07 | [AWS Lambda (Serverless Compute)](7.%20AWS%20Lambda/1.%20AWS%20Lambda%20Overview.md) | Dịch vụ tính toán Serverless (Serverless Compute) |
 | 08 | [VPC (Virtual Private Cloud)](8. VPC/1. VPC Overview.md) | Mạng ảo dùng riêng (Virtual Private Cloud) |
-| 09 | [EKS (Elastic Kubernetes Service)](9. EKS.md) | Dịch vụ Kubernetes được quản lý (Managed Kubernetes) |
-| 10 | [ECS (Elastic Container Service)](10. ECS.md) | Điều phối container (Container Orchestration) |
-| 11 | [ECR (Elastic Container Registry)](11. ECR.md) | Kho lưu trữ Docker image (Docker Registry) |
-| 12 | [CodePipeline / CodeBuild / CodeDeploy](12. CodePipeline.md) | Bộ dịch vụ CI/CD nguyên bản của AWS (Pipeline) |
-| 13 | [Route 53](13. Route 53.md) | Hệ thống phân giải tên miền (DNS) |
-| 14 | [CloudFront](14. CloudFront.md) | Mạng phân phối nội dung (CDN) |
-| 15 | [ACM (Certificate Manager)](15. ACM.md) | Quản lý chứng chỉ bảo mật TLS/SSL (ACM) |
-| 16 | [EFS (Elastic File System)](16. EFS.md) | Hệ thống tệp lưu trữ dùng chung (Shared Storage) |
+| 09 | [API Gateway & Cognito](9.%20API%20Gateway%20&%20Cognito/1.%20Amazon%20API%20Gateway%20Overview.md) | Quản lý API & Định danh người dùng (API Gateway & Identity) |
+| 10 | [EKS (Elastic Kubernetes Service)](10.%20EKS.md) | Dịch vụ Kubernetes được quản lý (Managed Kubernetes) |
+| 11 | [ECS (Elastic Container Service)](11.%20ECS.md) | Điều phối container (Container Orchestration) |
+| 12 | [ECR (Elastic Container Registry)](12.%20ECR.md) | Kho lưu trữ Docker image (Docker Registry) |
+| 13 | [CodePipeline / CodeBuild / CodeDeploy](13.%20CodePipeline.md) | Bộ dịch vụ CI/CD nguyên bản của AWS (Pipeline) |
+| 14 | [Route 53](14.%20Route%2053.md) | Hệ thống phân giải tên miền (DNS) |
+| 15 | [CloudFront](15.%20CloudFront.md) | Mạng phân phối nội dung (CDN) |
+| 16 | [ACM (Certificate Manager)](16.%20ACM.md) | Quản lý chứng chỉ bảo mật TLS/SSL (ACM) |
+| 17 | [EFS (Elastic File System)](17.%20EFS.md) | Hệ thống tệp lưu trữ dùng chung (Shared Storage) |
 
 ---
 
