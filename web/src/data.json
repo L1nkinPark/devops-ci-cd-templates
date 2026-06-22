@@ -2899,12 +2899,6 @@
                       "type": "file"
                     },
                     {
-                      "name": "8. Route 53 Pricing.md",
-                      "title": "8. Route 53 Pricing",
-                      "path": "cloud/aws/services/11. Route 53/8. Route 53 Pricing.md",
-                      "type": "file"
-                    },
-                    {
                       "name": "9. Lab 1 - Register Domain.md",
                       "title": "9. Lab 1 - Register Domain",
                       "path": "cloud/aws/services/11. Route 53/9. Lab 1 - Register Domain.md",
@@ -2938,6 +2932,12 @@
                       "name": "14. Lab 5 - Private Hosted Zone.md",
                       "title": "14. Lab 5 - Private Hosted Zone",
                       "path": "cloud/aws/services/11. Route 53/14. Lab 5 - Private Hosted Zone.md",
+                      "type": "file"
+                    },
+                    {
+                      "name": "15. Route 53 Pricing.md",
+                      "title": "15. Route 53 Pricing",
+                      "path": "cloud/aws/services/11. Route 53/15. Route 53 Pricing.md",
                       "type": "file"
                     }
                   ]
@@ -5431,11 +5431,6 @@
       "content": "# 7. Route 53 Health Checks\n\nRoute 53 Health Checks là tính năng quan trọng giúp giám sát tình trạng sẵn sàng hoạt động của các máy chủ và tài nguyên hạ tầng của bạn.\n\n## I. Cơ chế hoạt động\nRoute 53 liên tục gửi các yêu cầu kiểm tra (probes) từ các tác nhân kiểm tra (health checkers) nằm rải rác trên toàn thế giới tới các tài nguyên của bạn:\n* **Endpoint Monitoring:** Giám sát trực tiếp một địa chỉ IP hoặc tên miền bằng các giao thức **TCP**, **HTTP** hoặc **HTTPS** tại một cổng (port) cụ thể.\n* **Calculated Health Checks:** Giám sát trạng thái tổng hợp dựa trên kết quả của nhiều health checks khác (ví dụ: chỉ đánh giá là unhealthy khi có ít nhất 2 cụm máy chủ chính bị chết).\n* **CloudWatch Alarm Monitoring:** Giám sát trạng thái của một cảnh báo CloudWatch Alarm (phù hợp với các dịch vụ không thể truy cập trực tiếp từ bên ngoài internet).\n\n---\n\n## II. Tích hợp CloudWatch & Cảnh báo (Alarms)\nBạn có thể kết hợp chặt chẽ Route 53 Health Checks với các dịch vụ giám sát khác của AWS:\n1. **CloudWatch Alarm:** Tạo cảnh báo khi một Health Check chuyển sang trạng thái **Unhealthy** (không khỏe mạnh).\n2. **Amazon SNS (Simple Notification Service):** Cấu hình CloudWatch gửi cảnh báo tự động qua Email, SMS hoặc tin nhắn Chatbot (Slack, Teams) tới đội ngũ vận hành hệ thống ngay lập tức khi phát hiện máy chủ offline.\n3. **DNS Failover Integration:** Tự động loại bỏ địa chỉ IP của máy chủ gặp sự cố ra khỏi danh sách phản hồi DNS để người dùng không bị truy cập vào máy chủ lỗi.\n",
       "type": "markdown"
     },
-    "cloud/aws/services/11. Route 53/8. Route 53 Pricing.md": {
-      "title": "8. Route 53 Pricing",
-      "content": "# 8. Route 53 Pricing\n\nChi phí sử dụng dịch vụ Amazon Route 53 được chia thành các thành phần chính dưới đây và tính theo mô hình Pay-as-you-go (dùng bao nhiêu trả bấy nhiêu):\n\n## I. Chi phí Hosted Zone (Vùng lưu trữ bản ghi DNS)\n* **Hosted Zone tiêu chuẩn:** `$0.50` cho mỗi Hosted Zone (Public/Private) hoạt động trên một tháng.\n* **Chính sách ưu đãi:** \n  * Không tính phí nếu bạn xóa Hosted Zone trong vòng **12 giờ** kể từ khi tạo (phù hợp để test nhanh).\n  * Giảm giá khi số lượng Hosted Zone đạt mốc lớn (trên 25 hosted zones đầu tiên).\n\n---\n\n## II. Chi phí truy vấn DNS (DNS Queries)\n* **Standard Queries (Truy vấn cơ bản):** `$0.40` trên 1 triệu lượt truy vấn.\n* **Latency-based Queries (Truy vấn theo độ trễ):** `$0.60` trên 1 triệu lượt truy vấn.\n* **Geo-routing Queries (Truy vấn địa lý):** `$0.70` trên 1 triệu lượt truy vấn.\n* **Bản ghi ALIAS trỏ tới tài nguyên AWS:** **Miễn phí hoàn toàn** (ví dụ: trỏ root domain về CloudFront, ALB, S3 Static Web, API Gateway).\n\n---\n\n## III. Chi phí Health Checks (Kiểm tra sức khỏe)\n* **Tài nguyên thuộc AWS:** `$0.50` cho mỗi Health Check một tháng (giám sát EC2, ELB, S3,...).\n* **Tài nguyên không thuộc AWS (Non-AWS resources):** `$0.75` cho mỗi Health Check một tháng.\n* **Chi phí tính năng nâng cao:** Tính thêm phí nếu cấu hình kiểm tra sức khỏe từ các vùng địa lý tùy chỉnh hoặc bật tính năng đo lường độ trễ mạng (Latency measurements).\n",
-      "type": "markdown"
-    },
     "cloud/aws/services/11. Route 53/9. Lab 1 - Register Domain.md": {
       "title": "9. Lab 1 - Register Domain",
       "content": "# 9. Lab 1 - Register Domain\n\n## I. Yêu cầu bài thực hành\nBài thực hành hướng dẫn quy trình đăng ký mua và sở hữu tên miền riêng trực tiếp trên giao diện AWS Route 53.\n\nCác công việc chính cần thực hiện:\n1. Tìm kiếm tên miền khả dụng trên Route 53 Console.\n2. Lựa chọn các tên miền có đuôi mở rộng giá rẻ (ví dụ `.click` khoảng $3.00/năm) để tiết kiệm chi phí học tập.\n3. Khai báo thông tin liên hệ chủ sở hữu (Contact Info) và bật tính năng bảo mật thông tin (Privacy protection).\n4. Xác minh email đăng ký và kiểm tra trạng thái requests thành công.\n5. Cấu hình tắt tính năng tự động gia hạn (Auto-renew) để tránh phát sinh chi phí sau một năm.\n\n---\n\n## II. Xem hướng dẫn thực hành chi tiết\nNội dung thực hành mua và đăng ký tên miền đã được thực hiện chi tiết trong phần mở rộng của bài Lab 1 CloudFront. Vui lòng xem hướng dẫn chi tiết từng bước triển khai tại:\n **[Lab 1 CloudFront - Bước 1: Mua và đăng ký tên miền riêng trên AWS Route 53](../../../lab/10.%20CloudFront/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3/README.md#buoc-1-mua-va-dang-ky-ten-mien-rieng-tren-aws-route-53)**\n",
@@ -5464,6 +5459,11 @@
     "cloud/aws/services/11. Route 53/14. Lab 5 - Private Hosted Zone.md": {
       "title": "14. Lab 5 - Private Hosted Zone",
       "content": "# 14. Lab 5 - Private Hosted Zone\n\n## I. Yêu cầu bài thực hành\nBài thực hành hướng dẫn cấu hình và phân giải tên miền nội bộ (Private Hosted Zone) bảo mật trong mạng ảo VPC của AWS.\n\nCác công việc chính cần thực hiện:\n1. Khởi tạo **2 EC2 Instance (A/B)** trong cùng một mạng ảo VPC, đảm bảo kích hoạt Public IP và tính năng DNS resolution/DNS hostnames trên VPC.\n2. Tạo một **Private Hosted Zone** cho tên miền nội bộ (ví dụ: `test.local`) và liên kết zone này với VPC chứa hai máy chủ trên.\n3. Tạo các bản ghi loại **A-Record** (`server-a.test.local` và `server-b.test.local`) trỏ đến địa chỉ Private IP tương ứng của Server A và Server B.\n4. Cấu hình **Security Group (SG)**: Mở quy tắc inbound `All ICMP - IPv4` và gán nguồn là chính Security Group đó để các instance có thể giao tiếp ping nội bộ với nhau.\n5. Đăng nhập vào Server A (SSH) và thực hiện kiểm tra kết nối bằng lệnh `ping` tới Server B sử dụng tên miền nội bộ `server-b.test.local`.\n\n---\n\n## II. Xem hướng dẫn thực hành chi tiết\nVui lòng xem hướng dẫn chi tiết từng bước triển khai tại:\n **[Hướng dẫn thực hành chi tiết Lab 5 (README.md)](../../lab/11.%20Route%2053/5.%20Lab%205%20-%20Private%20Hosted%20Zone/README.md)**\n",
+      "type": "markdown"
+    },
+    "cloud/aws/services/11. Route 53/15. Route 53 Pricing.md": {
+      "title": "15. Route 53 Pricing",
+      "content": "# 15. Route 53 Pricing\n\nChi phí sử dụng dịch vụ Amazon Route 53 được tính theo mô hình Pay-as-you-go (dùng bao nhiêu trả bấy nhiêu) dựa trên các yếu tố cơ bản sau:\n\n## I. Các yếu tố tính phí chính\n\n### 1. Giá của tên miền (Domain Registration)\n* Phí đăng ký, gia hạn hoặc chuyển đổi tên miền phụ thuộc vào đuôi tên miền (TLD - Top-Level Domain) mà bạn lựa chọn (ví dụ: `.com`, `.net`, `.org`, `.click`, `.vn`,...).\n* Mỗi đuôi tên miền có một mức phí thường niên khác nhau do quy định của nhà đăng ký tên miền quốc tế (ICANN) và AWS.\n\n### 2. Hosted Zone (Vùng lưu trữ bản ghi DNS)\n* **Hosted Zone tiêu chuẩn (Public/Private)**: `$0.50` cho mỗi Hosted Zone hoạt động trong vòng một tháng.\n* **Lưu ý**: AWS không tính phí nếu bạn xóa Hosted Zone trong vòng **12 giờ** kể từ lúc khởi tạo (thích hợp cho các bài kiểm tra hoặc cấu hình thử nghiệm nhanh).\n\n### 3. Query (Truy vấn DNS)\nChi phí được tính trên mỗi triệu (1M) lượt truy vấn gửi đến Route 53:\n* **Standard Queries (Truy vấn tiêu chuẩn)**: `$0.40` trên 1 triệu lượt truy vấn.\n* **Latency-based Queries (Truy vấn dựa trên độ trễ)**: `$0.60` trên 1 triệu lượt truy vấn.\n* **Geo-routing/Geoproximity Queries (Truy vấn địa lý)**: `$0.70` trên 1 triệu lượt truy vấn.\n* **Bản ghi ALIAS trỏ tới tài nguyên AWS (CloudFront, ALB, S3, API Gateway)**: **Miễn phí hoàn toàn** lượt truy vấn.\n\n### 4. Health Check (Giám sát sức khỏe máy chủ)\n* **Tài nguyên thuộc AWS**: `$0.50` cho mỗi Health Check một tháng (như giám sát EC2, ELB, S3,...).\n* **Tài nguyên ngoài AWS (Non-AWS resources)**: `$0.75` cho mỗi Health Check một tháng.\n\n### 5. Log (Lịch sử truy vấn DNS)\n* Phí lưu trữ và xử lý log truy vấn của Route 53 phụ thuộc vào giá của dịch vụ **Amazon CloudWatch** (tính theo dung lượng dữ liệu log được lưu trữ và xử lý).\n\n---\n\n## II. Tham khảo chi tiết\n*Chi tiết hơn tham khảo bảng giá cập nhật mới nhất tại:* **[AWS Route 53 Pricing](https://aws.amazon.com/route53/pricing/)**\n",
       "type": "markdown"
     },
     "cloud/aws/services/12. EKS.md": {
