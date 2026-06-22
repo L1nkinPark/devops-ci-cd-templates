@@ -1,99 +1,82 @@
-# Lab 4 - Thực hành với Route 53 Health check & Failover Routing - Hướng dẫn chi tiết
+# Lab 4 - Thực hành Giám sát Sức khỏe Máy chủ (Route 53 Health Check) - Hướng dẫn chi tiết
 
-  **[Xem Đề bài / Yêu cầu bài Lab](4.%20Lab%204%20-%20Route%2053%20Health%20Check.md)**
+ **[Xem Đề bài / Yêu cầu bài Lab](4.%20Lab%204%20-%20Route%2053%20Health%20Check.md)**
 
 ---
 
 ## Các bước thực hiện chi tiết
 
-### Bước 1: Chuẩn bị Tài nguyên Chính & Dự phòng
-1. **Máy chủ chính (EC2):** Sử dụng máy chủ web EC2 đã khởi tạo từ Lab 2 (hoặc tạo mới). Đảm bảo dịch vụ Apache đang chạy và bạn có địa chỉ Public IP của nó (ví dụ: `54.198.88.99`).
-2. **Trang dự phòng (S3):** 
-   * Truy cập S3 Console > Chọn bucket chứa website tĩnh của bạn (hoặc tạo một bucket mới, ví dụ: `maintenance-h1eudayne`).
-   * Upload tệp `index.html` đơn giản với nội dung thông báo bảo trì:
-     ```html
-     <h1>System Under Maintenance</h1>
-     <p>Chúng tôi đang bảo trì hệ thống định kỳ. Xin vui lòng quay lại sau ít phút.</p>
-     ```
-   * Đảm bảo bucket đã được bật tính năng **Static website hosting** và có địa chỉ endpoint hoạt động bình thường (ví dụ: `maintenance-h1eudayne.s3-website-us-east-1.amazonaws.com`).
+### Bước 1: Sử dụng lại máy chủ EC2 đã tạo ở Lab 2
+1. Đảm bảo máy chủ EC2 từ **Lab 2** của bạn đang chạy bình thường.
+2. Kiểm tra và ghi lại địa chỉ **Public IPv4 address** của máy chủ đó (trong ví dụ thực tế này là: `98.93.38.226`).
+3. Đảm bảo cổng HTTP (80) đang mở trong Security Group và bạn có thể truy cập được trang web qua IP này.
 
 ---
 
 ### Bước 2: Khởi tạo Route 53 Health Check
-1. Mở dịch vụ **Route 53** trên AWS Console.
-2. Tại menu bên trái, nhấp chọn mục **Health checks** (Kiểm tra sức khỏe).
-3. Click chọn nút **Create health check**.
-4. Cấu hình các thông số kiểm tra:
-   * **Name:** Nhập `main-server-health-check`.
-   * **What to monitor:** Chọn **Endpoint**.
+1. Đăng nhập vào AWS Console và mở dịch vụ **Route 53**.
+2. Tại menu điều hướng bên trái, nhấp chọn mục **Health checks** (Kiểm tra sức khỏe).
+
+![Trang dashboard Health checks trống](../../../../../images/aws/route53_lab4_healthcheck_dashboard.png)
+*Hình 1: Giao diện quản lý Health checks ban đầu (chưa có bộ kiểm tra sức khỏe nào).*
+
+3. Click chọn nút **Create health check** ở góc trên bên phải.
+4. Cấu hình thông tin kiểm tra sức khỏe máy chủ như sau:
+   * **Name - optional:** Nhập `ec2-health-check`.
+   * **What to monitor:** Chọn **Endpoint** (để theo dõi một máy chủ hoặc tài nguyên cụ thể).
    * **Specify endpoint by:** Chọn **IP address**.
-   * **Protocol:** Chọn **HTTP** (do lab của chúng ta đang chạy Apache thường không có SSL ở cổng 80).
-   * **IP address:** Nhập địa chỉ Public IP của máy chủ EC2 chính (ví dụ: `54.198.88.99`).
+   * **Protocol:** Chọn **HTTP** (kiểm tra cổng 80).
+   * **IP address:** Nhập địa chỉ Public IP của EC2 ở Bước 1 (`98.93.38.226`).
    * **Port:** Nhập `80`.
-   * **Path:** Nhập `/` (để kiểm tra trang chủ).
-5. Click chọn **Next**.
-6. Tại màn hình cấu hình Cảnh báo (Create alarm):
-   * Chọn **No** ở mục *Create alarm* (để tránh phát sinh thêm chi phí dịch vụ CloudWatch Alarm/SNS trong môi trường học tập).
-7. Click chọn **Create health check**.
-8. Trạng thái ban đầu của Health Check sẽ hiển thị là *Unknown*. Sau khoảng **1 - 2 phút**, hệ thống gửi request probe thành công sẽ chuyển sang màu xanh **Healthy**.
+   * **Path:** Nhập `/` (để kiểm tra đường dẫn gốc chứa trang `index.html`).
+
+![Cấu hình tạo Health check](../../../../../images/aws/route53_lab4_create_healthcheck.png)
+*Hình 2: Cấu hình chi tiết endpoint cho ec2-health-check trỏ về Public IP của máy chủ.*
+
+5. Nhấp chọn **Next**.
+6. Tại bước cấu hình Cảnh báo (Create alarm), tích chọn **No** ở mục *Create alarm* (để đơn giản hóa lab và tránh phát sinh chi phí CloudWatch/SNS).
+7. Nhấp chọn **Create health check**.
 
 ---
 
-### Bước 3: Cấu hình bản ghi Failover Routing trong Hosted Zone
-Chúng ta sẽ tạo hai bản ghi trùng tên nhưng khác kiểu định tuyến Failover:
+### Bước 3: Kiểm tra trạng thái hoạt động ban đầu (Healthy)
+1. Sau khi tạo xong, trạng thái ban đầu của Health check sẽ hiển thị là *Unknown* trong khoảng 1 - 2 phút.
+2. Route 53 sẽ gửi các yêu cầu kiểm tra liên tục từ các máy chủ giám sát toàn cầu (checkers) tới IP máy chủ của bạn.
+3. Click chọn vào tên Health check `ec2-health-check` vừa tạo, chọn tab **Monitoring** hoặc xem trực tiếp trạng thái:
+   * **Kết quả:** Trạng thái chuyển sang màu xanh lá với cột tin nhắn **Success: HTTP Status Code 200, OK** từ tất cả các khu vực giám sát (Singapore, Sydney, Virginia, Oregon, v.v.).
 
-#### 1. Tạo bản ghi chính (Primary Record)
-1. Vào Route 53 > **Hosted zones** > Chọn tên miền của bạn (`h1eudayne.click`).
-2. Nhấp chọn **Create record** và cấu hình:
-   * **Record name:** Nhập `service` (tên miền truy cập sẽ là `service.h1eudayne.click`).
-   * **Record type:** Chọn **A – Routes traffic to an IPv4 address...**
-   * **Alias:** Để tắt (**No**).
-   * **Value:** Nhập Public IP của máy chủ EC2 chính (ví dụ: `54.198.88.99`).
-   * **Routing policy:** Chọn **Failover**.
-   * **Failover record type:** Chọn **Primary** (Bản ghi chính).
-   * **Associate with health check:** Chọn **Yes**.
-   * **Health check to associate:** Chọn đúng tên Health check bạn vừa tạo ở Bước 2 (`main-server-health-check`).
-   * **Record ID:** Nhập `main-web-server`.
-3. Click chọn **Create records**.
-
-#### 2. Tạo bản ghi dự phòng (Secondary Record)
-1. Tiếp tục nhấp chọn **Create record** để cấu hình bản ghi dự phòng:
-   * **Record name:** Nhập trùng tên `service`.
-   * **Record type:** Chọn **A – Routes traffic to an IPv4 address...**
-   * **Alias:** Gạt sang bật (**Yes**) (vì chúng ta sẽ trỏ tới S3 Static Website Endpoint bằng ALIAS).
-   * **Route traffic to:**
-     * Chọn *Alias to S3 website endpoint*.
-     * Chọn Region tương ứng của bucket S3 (ví dụ: *us-east-1*).
-     * Chọn đúng tên bucket dự phòng của bạn (`maintenance-h1eudayne`).
-   * **Routing policy:** Chọn **Failover**.
-   * **Failover record type:** Chọn **Secondary** (Bản ghi dự phòng).
-   * **Associate with health check:** Chọn **No** (Bản ghi phụ không cần tự kiểm tra).
-   * **Record ID:** Nhập `maintenance-web-page`.
-2. Click chọn **Create records**.
+![Trạng thái Health check thành công](../../../../../images/aws/route53_lab4_healthcheck_success.png)
+*Hình 3: Các checker toàn cầu gửi yêu cầu thành công và ghi nhận trạng thái Healthy.*
 
 ---
 
-### Bước 4: Kiểm thử kịch bản tự động phục hồi sự cố
-1. **Kiểm tra trạng thái bình thường:**
-   * Mở trình duyệt và truy cập `http://service.h1eudayne.click`.
-   * **Kết quả:** Giao diện hiển thị trang web hoạt động bình thường của EC2.
-2. **Giả lập sự cố máy chủ chính:**
-   * SSH vào máy chủ EC2 chính qua terminal.
-   * Chạy lệnh sau để tắt hoàn toàn dịch vụ máy chủ web Apache:
-     ```bash
-     sudo systemctl stop httpd
-     ```
-3. **Theo dõi sự thay đổi trên Route 53:**
-   * Quay lại Route 53 Console > mục **Health checks**.
-   * Chờ khoảng **1 - 2 phút** (tùy thuộc vào tần suất kiểm tra), bạn sẽ thấy trạng thái chuyển từ xanh sang đỏ **Unhealthy**.
-4. **Kiểm tra kết quả phân giải DNS của Client:**
-   * Mở trình duyệt ẩn danh mới (hoặc xóa cache DNS bằng lệnh `ipconfig /flushdns` trên Windows).
-   * Truy cập lại địa chỉ: `http://service.h1eudayne.click`.
-   * **Kết quả:** Trình duyệt tự động hiển thị trang thông báo bảo trì từ S3:
-     *"System Under Maintenance - Chúng tôi đang bảo trì hệ thống định kỳ. Xin vui lòng quay lại sau ít phút."*
-5. **Khôi phục hệ thống:**
-   * Quay lại terminal EC2 và khởi chạy lại dịch vụ web:
-     ```bash
-     sudo systemctl start httpd
-     ```
-   * Theo dõi Health Check chuyển sang xanh trở lại. Truy cập lại tên miền phụ, giao diện web EC2 sẽ tự động hiển thị lại bình thường.
+### Bước 4: Giả lập sự cố - Stop dịch vụ máy chủ Web Apache
+Để kiểm chứng khả năng giám sát của Route 53 khi hệ thống gặp lỗi:
+1. Mở Terminal (PowerShell hoặc Git Bash) và kết nối SSH vào máy chủ EC2.
+2. Chạy lệnh sau để tắt dịch vụ máy chủ web Apache (`httpd`):
+   ```bash
+   sudo service httpd stop
+   ```
+   *(Hệ thống Amazon Linux 2023 sẽ tự động chuyển hướng lệnh sang `systemctl stop httpd.service`)*.
+
+![Tắt dịch vụ Apache trên EC2](../../../../../images/aws/route53_lab4_stop_httpd.png)
+*Hình 4: Chạy lệnh stop httpd trên terminal của EC2 để giả lập sự cố máy chủ offline.*
+
+---
+
+### Bước 5: Kiểm tra lại trạng thái Health Check (Unhealthy)
+1. Quay lại trang Route 53 Console > mục **Health checks** > Chọn `ec2-health-check`.
+2. Chờ khoảng 1 - 2 phút để Route 53 cập nhật trạng thái sau khi số lần thất bại (Failure threshold) đạt giới hạn mặc định (3 lần).
+3. **Kết quả:** Trạng thái của Health check chuyển sang màu đỏ báo lỗi **Failure: connection refused** tại tất cả các khu vực. Hệ thống đã phát hiện chính xác sự cố máy chủ web bị sập.
+
+![Trạng thái Health check bị lỗi](../../../../../images/aws/route53_lab4_healthcheck_failed.png)
+*Hình 5: Route 53 ghi nhận sự cố kết nối bị từ chối và báo động Unhealthy.*
+
+---
+
+### Bước 6: Khôi phục dịch vụ (Tùy chọn)
+1. Quay lại terminal EC2 và khởi động lại dịch vụ Apache:
+   ```bash
+   sudo service httpd start
+   ```
+2. Đợi 1 - 2 phút và kiểm tra lại Route 53 Console, trạng thái của `ec2-health-check` sẽ tự động chuyển sang màu xanh lá **Healthy** trở lại.
