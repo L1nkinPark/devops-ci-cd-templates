@@ -6,58 +6,71 @@
 
 ## Các bước thực hiện chi tiết
 
-### Bước 1: Khởi tạo máy chủ Web EC2 và lấy Public IP
+### Bước 1: Khởi tạo máy chủ Web EC2 và cấu hình User Data
 1. Truy cập dịch vụ **Amazon EC2** trên AWS Console > Click chọn **Launch instance**.
 2. Thiết lập thông số cơ bản cho instance:
    * **Name:** Nhập `web-server-lab2`.
    * **OS:** Chọn **Amazon Linux 2023** (hoặc Amazon Linux 2).
-   * **Instance type:** Chọn **t2.micro** (Free Tier).
+   * **Instance type:** Chọn **t3.micro** (hoặc `t2.micro` tùy thuộc vào Free Tier ở khu vực của bạn).
    * **Key pair:** Chọn key pair có sẵn của bạn để SSH (nếu cần).
-   * **Network settings:** Tích chọn **Allow HTTP traffic from the internet** (cho phép truy cập cổng 80).
-3. Cuộn xuống phần **Advanced details**, tại mục **User data**, dán đoạn script sau để tự động cài đặt Apache Web Server:
-   ```bash
-   #!/bin/bash
-   # Cập nhật hệ thống
-   yum update -y
-   # Cài đặt máy chủ web Apache
-   yum install -y httpd
-   # Khởi chạy dịch vụ httpd
-   systemctl start httpd
-   # Kích hoạt tự chạy cùng hệ thống
-   systemctl enable httpd
-   # Tạo trang web mặc định hiển thị thông tin chào mừng và IP của máy chủ
-   PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-   echo "<h1>Welcome to AWS Route 53 Lab 2!</h1><p>Served by EC2 instance. Public IP: $PUBLIC_IP</p>" > /var/www/html/index.html
-   ```
-4. Click chọn **Launch instance** và đợi trạng thái của instance chuyển sang *Running*.
-5. Click chọn instance mới tạo, ghi lại địa chỉ **Public IPv4 address** (ví dụ: `54.198.88.99`).
+3. Cấu hình **User Data**:
+   * Cuộn xuống phần **Advanced details**, tại mục **User data**, dán nội dung từ tệp script có sẵn của bài học EC2:
+     👉 **[lab3-user-data-meta-data.sh](../../1.%20EC2/3.%20Amazon%20EC2%20User%20Data%20and%20Metadata%20Lab/lab3-user-data-meta-data.sh)**
+   * Nội dung script này sẽ tự động cài đặt máy chủ web Apache (`httpd`), tạo trang web mẫu, đồng thời truy xuất Private IP và Public IP từ IMDSv2 để hiển thị lên màn hình.
+
+   ![Cấu hình User data khi launch EC2](../../../../../images/aws/route53_lab2_ec2_userdata.png)
+   *Hình 1: Cấu hình dán đoạn mã User Data trong quá trình khởi tạo EC2 Instance.*
+
+4. Cấu hình **Security Group (Mở port 80)**:
+   * Chắc chắn rằng Security Group của bạn có quy tắc cho phép traffic **HTTP (Port 80)** từ nguồn bất kỳ (`0.0.0.0/0`) để có thể truy cập được trang web từ bên ngoài Internet.
+
+   ![Cấu hình Security Group mở port 80](../../../../../images/aws/route53_lab2_sg_rules.png)
+   *Hình 2: Cấu hình Inbound Rules của Security Group cho phép truy cập cổng 80 (HTTP) từ bất cứ đâu.*
+
+5. Click chọn **Launch instance** và đợi trạng thái của instance chuyển sang *Running*.
+6. Chọn instance mới tạo để xem chi tiết và lưu lại địa chỉ **Public IPv4 address** (trong ví dụ thực tế này là: `54.152.59.216`).
 
 ---
 
-### Bước 2: Cấu hình bản ghi A cho Subdomain trên Route 53
-1. Quay lại dịch vụ **Route 53** > Click chọn **Hosted zones** > Chọn tên miền của bạn (ví dụ: `h1eudayne.click`).
+### Bước 2: Kiểm tra truy cập máy chủ Web bằng Public IP
+Trước khi cấu hình DNS trên Route 53, hãy kiểm tra xem máy chủ Web đã hoạt động bình thường chưa:
+1. Mở trình duyệt web của bạn.
+2. Nhập địa chỉ Public IP: `http://54.152.59.216`.
+3. Trang web hiển thị thành công dòng thông tin chào mừng kèm theo thông tin địa chỉ IP nội bộ và công cộng được lấy tự động qua Metadata Service.
+
+![Kiểm tra truy cập máy chủ Web qua Public IP](../../../../../images/aws/route53_lab2_ip_test.png)
+*Hình 3: Kết quả truy cập trang web thông qua địa chỉ Public IP tĩnh của EC2.*
+
+---
+
+### Bước 3: Tạo bản ghi loại A-Record trỏ subdomain về Public IP
+1. Truy cập dịch vụ **Route 53** > Click chọn **Hosted zones** > Chọn tên miền của bạn (ở đây là: `h1eudayne.click`).
 2. Nhấp chọn nút **Create record** ở góc trên bên phải.
-3. Điền cấu hình bản ghi như sau:
-   * **Record name:** Nhập `app` (để tạo tên miền phụ `app.h1eudayne.click`).
+3. Cấu hình bản ghi DNS như sau:
+   * **Record name:** Nhập `testserver` (để tạo tên miền phụ `testserver.h1eudayne.click`).
    * **Record type:** Chọn **A – Routes traffic to an IPv4 address and some AWS resources**.
    * **Alias:** Để tắt (**No**).
-   * **Value:** Dán địa chỉ Public IP của EC2 bạn đã sao chép ở Bước 1 (ví dụ: `54.198.88.99`).
+   * **Value:** Dán địa chỉ Public IP của EC2 vừa lấy được ở trên (`54.152.59.216`).
    * **TTL (seconds):** Giữ mặc định `300` (5 phút).
    * **Routing policy:** Chọn **Simple routing**.
-4. Click chọn **Create records**.
+
+![Cấu hình bản ghi A-Record cho subdomain testserver trên Route 53](../../../../../images/aws/route53_lab2_create_record.png)
+*Hình 4: Thiết lập tạo bản ghi loại A-Record cho tên miền phụ testserver trỏ về Public IP của EC2.*
+
+4. Click chọn **Create records** và chờ hệ thống DNS cập nhật.
 
 ---
 
-### Bước 3: Cấu hình trỏ Root Domain về EC2 Instance
-Để trỏ tên miền gốc (Root Domain / Apex Domain - ví dụ: `h1eudayne.click` không chứa tiền tố) về máy chủ EC2, ta thực hiện như sau:
+### Bước 4: Cấu hình trỏ Root Domain về EC2 Instance (Tùy chọn)
+Để trỏ tên miền gốc (Root Domain / Apex Domain - ví dụ: `h1eudayne.click` không chứa tiền tố) về máy chủ EC2, ta có 2 phương án:
 
-#### Phương án 1: Trỏ trực tiếp về IP tĩnh của EC2 (Thực hành trong Lab này)
-1. Trong Hosted Zone, tiếp tục click chọn **Create record**.
+#### Phương án 1: Trỏ trực tiếp về IP tĩnh của EC2 (Tương tự subdomain)
+1. Trong Hosted Zone, click chọn **Create record**.
 2. Điền cấu hình bản ghi:
    * **Record name:** **Để trống** (để cấu hình trực tiếp cho tên miền gốc `h1eudayne.click`).
    * **Record type:** Chọn **A – Routes traffic to an IPv4 address...**
    * **Alias:** Để tắt (**No**).
-   * **Value:** Dán địa chỉ Public IP của EC2 (ví dụ: `54.198.88.99`).
+   * **Value:** Dán địa chỉ Public IP của EC2 (`54.152.59.216`).
    * Click chọn **Create records**.
 
 #### Phương án 2: Trỏ về Elastic Load Balancer (ELB) bằng bản ghi ALIAS (Môi trường Product)
@@ -75,27 +88,28 @@ Vì chuẩn DNS quốc tế không cho phép tạo bản ghi CNAME tại Root Do
 
 ---
 
-### Bước 4: Kiểm thử và Xác minh DNS
-Sau khi tạo xong bản ghi, chúng ta sẽ kiểm tra xem DNS đã hoạt động chưa:
+### Bước 5: Kiểm thử và Xác minh DNS
 
 #### 1. Sử dụng công cụ dòng lệnh (nslookup/dig)
-Mở PowerShell hoặc Command Prompt trên máy tính cá nhân của bạn và chạy lệnh sau:
+Mở PowerShell hoặc Command Prompt trên máy tính cá nhân của bạn và chạy lệnh sau để kiểm tra xem tên miền đã được phân giải đúng IP chưa:
 ```powershell
-nslookup app.h1eudayne.click
+nslookup testserver.h1eudayne.click
 ```
-**Kết quả hiển thị chính xác:**
+**Kết quả phân giải thành công sẽ có dạng:**
 ```text
 Server:  UnKnown
 Address:  192.168.1.1
 
 Non-authoritative answer:
-Name:    app.h1eudayne.click
-Address:  54.198.88.99
+Name:    testserver.h1eudayne.click
+Address:  54.152.59.216
 ```
-Địa chỉ IP trả về trùng khớp với Public IP của EC2 chứng tỏ bản ghi A-Record đã hoạt động chính xác. Chạy tương tự cho tên miền gốc `nslookup h1eudayne.click`.
+Địa chỉ IP trả về trùng khớp với Public IP của EC2 chứng tỏ bản ghi A-Record đã hoạt động chính xác.
 
-#### 2. Kiểm thử trên Trình duyệt
-1. Mở trình duyệt web của bạn.
-2. Truy cập địa chỉ: `http://app.h1eudayne.click` (hoặc `http://h1eudayne.click`).
-3. **Kết quả:** Trình duyệt hiển thị trang HTML chào mừng:
-   *"Welcome to AWS Route 53 Lab 2! Served by EC2 instance. Public IP: 54.198.88.99"*
+#### 2. Kiểm thử trên Trình duyệt bằng Subdomain
+1. Mở trình duyệt web.
+2. Truy cập địa chỉ tên miền phụ đã tạo: `http://testserver.h1eudayne.click`.
+3. Trang web hiển thị thành công với giao diện giống hệt như khi truy cập trực tiếp bằng IP.
+
+![Kiểm tra truy cập máy chủ Web qua Subdomain](../../../../../images/aws/route53_lab2_domain_test.png)
+*Hình 5: Trang web hiển thị thành công khi truy cập bằng tên miền phụ testserver.h1eudayne.click.*
