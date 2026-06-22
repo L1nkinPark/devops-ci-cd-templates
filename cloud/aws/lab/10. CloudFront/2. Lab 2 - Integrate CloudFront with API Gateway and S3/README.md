@@ -202,6 +202,9 @@ Khi bật Lambda Proxy, cấu trúc dữ liệu truyền vào hàm Lambda (`even
 2. Lưu và nhấn **Deploy** code trên AWS Lambda Console.
 3. Khi bạn gửi request qua Postman hoặc xem log trên **Amazon CloudWatch Logs**, bạn sẽ thấy các log debug in ra thông tin headers và body, đặc biệt là sự xuất hiện của custom header `'source': 'CloudFront'` được chuyển tiếp thành công từ CloudFront CDN xuống Lambda.
 
+   ![Xem log CloudWatch có custom header Source CloudFront](../../../../../images/aws/cloudfront_apigw_cloudwatch_logs.png)
+   *Hình 12: Logs sự kiện CloudWatch xác nhận header Source: CloudFront và body JSON được Lambda ghi nhận thành công.*
+
 ---
 
 * **Bài trước**: [1. Lab 1 – Sử dụng CloudFront kết hợp với S3](../1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3.md)
