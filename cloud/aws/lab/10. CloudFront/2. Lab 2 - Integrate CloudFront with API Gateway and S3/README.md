@@ -58,46 +58,55 @@ Chúng ta sẽ khai báo thêm API Gateway làm nguồn gốc (Origin) thứ hai
 Sau khi đã có 2 Origins (S3 chứa web tĩnh và API Gateway xử lý logic động), chúng ta cần tạo quy luật định tuyến (Behavior) trên CloudFront:
 
 1. Di chuyển sang tab **Behaviors** > Click chọn nút **Create behavior**.
+
+   ![Xem tab Behaviors hiện tại](../../../../../images/aws/cloudfront_apigw_cf_behaviors.png)
+   *Hình 5: Danh sách Behaviors hiện tại của Distribution - Chọn Create behavior.*
+
 2. Thiết lập thông số Behavior:
-   * **Path pattern**: Nhập `/dev/calculate`.
-     * *Giải thích quan trọng:* Do ở Bước 2 chúng ta để trống **Origin path**, nên Path pattern bắt buộc phải bao gồm cả Stage name `/dev` của API Gateway. Khi người dùng gọi tới `https://<CF_domain>/dev/calculate`, CloudFront sẽ chuyển tiếp nguyên vẹn đường dẫn này tới API Gateway Origin, khớp chính xác cấu trúc Stage và tài nguyên của API.
+   * **Path pattern**: Nhập `/dev*` (dùng dấu wildcard để khớp với tất cả các API requests đi qua stage `/dev`).
    * **Origin**: Chọn Origin API Gateway vừa tạo ở Bước 2 (`my-custom-api-gateway`).
    * **Viewer protocol policy**: Chọn **Redirect HTTP to HTTPS** (Tự động nâng cấp kết nối bảo mật).
-   * **Allowed HTTP methods**: Chọn **`GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE`** (Bắt buộc phải bật đầy đủ phương thức để hỗ trợ request POST gửi dữ liệu tính toán).
+   * **Allowed HTTP methods**: Chọn **`GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE`** (Cho phép đầy đủ các phương thức để API hoạt động bình thường).
 3. Tại mục **Cache key and origin requests**:
-   * **Cache policy**: Chọn **`CachingDisabled`**.
-     * *Lưu ý quan trọng:* Chúng ta tuyệt đối không lưu cache kết quả tính toán động của API, mỗi request gửi lên bắt buộc phải chuyển trực tiếp về Lambda xử lý.
-   * **Origin request policy**: Chọn **`AllViewer`**.
-     * *Lưu ý quan trọng:* Đảm bảo chuyển tiếp đầy đủ Headers, Query Strings và Request Body từ người dùng xuống API Gateway.
+   * **Cache policy**: Chọn **`CachingDisabled`** (Tắt cache hoàn toàn đối với request API động).
+   * **Origin request policy**: Chọn chính sách **`AllViewerExceptHostHeader`** (Đây là cấu hình khuyên dùng cho API Gateway không có custom domain để tránh lỗi không khớp Host header khi forward request).
 4. Click chọn nút **Create behavior**.
+
+   ![Cấu hình Create Behavior](../../../../../images/aws/cloudfront_apigw_cf_create_behavior.png)
+   *Hình 6: Thiết lập chi tiết Path pattern /dev* và chính sách Caching/Origin Request.*
+
 5. Đảm bảo thứ tự ưu tiên (Precedence) tại bảng danh sách Behaviors:
-   * **Thứ tự 0**: Path `/dev/calculate` trỏ tới API Gateway.
+   * **Thứ tự 0**: Path `/dev*` trỏ tới API Gateway.
    * **Thứ tự 1 (Default `*`)**: Path mặc định trỏ tới S3 bucket.
 
 ---
 
 ### Bước 4: Kiểm thử và Xác minh
 
-Chờ trạng thái của CloudFront Distribution chuyển từ *Deploying* sang hoàn tất (Last modified hiển thị mốc thời gian cụ thể).
+Sau khi cấu hình hoàn tất và CloudFront đã deploy xong (trạng thái Last modified hiển thị thời gian cụ thể), CloudFront sẽ đồng thời phục vụ **2 backend song song** thông qua một tên miền duy nhất (ở đây là Custom Domain `web.h1eudayne.click`).
 
-#### 1. Kiểm thử định tuyến API động qua tên miền CloudFront
-1. Mở Postman hoặc một công cụ test API, cấu hình request **POST**.
-2. **Địa chỉ URL:** Sử dụng tên miền mặc định của CloudFront hoặc Custom Domain bạn đã cấu hình ở Lab 1 kèm đường dẫn `/dev/calculate`:
-   * Cú pháp: `https://<CF_domain>/dev/calculate` hoặc `https://web.h1eudayne.click/dev/calculate`
-3. Tại tab **Body**, cấu hình định dạng JSON gửi phép tính cộng:
+#### 1. Kiểm thử định tuyến API động qua Custom Domain (Postman)
+1. Mở Postman, cấu hình request **POST**.
+2. **Địa chỉ URL:** Sử dụng tên miền riêng của bạn thay thế cho link API Gateway trực tiếp trước đây:
+   `https://web.h1eudayne.click/dev/calculate`
+3. Tại tab **Body**, dán payload JSON phép tính (ví dụ thực hiện phép tính `5 + 25`):
    ```json
    {
-       "firstName": 10,
-       "secondNum": 20,
+       "firstNum": 5,
+       "secondNum": 25,
        "operator": "ADD"
    }
    ```
 4. Click chọn **Send**.
-5. **Kết quả:** Trả về mã phản hồi **`200 OK`** cùng kết quả tính toán chính xác (`30`) từ Lambda Backend. Điều này xác nhận CloudFront đã phân tuyến chính xác request động `/dev/*` tới API Gateway mà không bị cache.
+5. **Kết quả:** Trả về mã phản hồi **`200 OK`** cùng kết quả tính toán chính xác từ Lambda Backend (`result: 30`). Điều này xác nhận CloudFront đã nhận diện tiền tố `/dev`, bỏ qua cache và chuyển tiếp chính xác request về API Gateway.
+
+   ![Kết quả kiểm thử qua Postman](../../../../../images/aws/cloudfront_apigw_postman_test.png)
+   *Hình 7: Postman gọi thành công qua Custom Domain CloudFront, trả về kết quả tính toán 30 từ Lambda.*
 
 #### 2. Kiểm thử định tuyến trang tĩnh S3
-1. Truy cập `https://<CF_domain>/index.html` hoặc `https://web.h1eudayne.click/index.html` trên trình duyệt.
-2. **Kết quả:** Trang web tĩnh DIMENSION hiển thị bình thường. (Do đường dẫn không khớp với `/dev/calculate` nên được định tuyến về S3 thông qua Default Behavior `*`).
+1. Truy cập `https://web.h1eudayne.click/index.html` hoặc trực tiếp trang chủ trên trình duyệt.
+2. **Kết quả:** Trang web tĩnh DIMENSION hiển thị bình thường. 
+3. **Giải thích cơ chế:** Vì request này không khớp với Path pattern `/dev*`, nên CloudFront tự động khớp với Default Behavior (`*`) và định tuyến về S3 Origin để tải tệp tĩnh lên trình duyệt. Quy trình này diễn ra hoàn toàn trong suốt với người dùng.
 
 ---
 
