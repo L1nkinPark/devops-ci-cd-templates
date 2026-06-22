@@ -162,6 +162,18 @@ Các hướng dẫn thực hành phân phối nội dung tĩnh và động toàn
 | [1. Lab 1 – Sử dụng CloudFront kết hợp với S3](10.%20CloudFront/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3.md) | Cấu hình CloudFront phân phối static website từ S3 bucket private sử dụng Origin Access Control (OAC) và cập nhật Bucket Policy | AWS CloudFront, AWS S3, OAC, Bucket Policy |
 | [2. Lab 2 – Sử dụng CloudFront kết hợp với API Gateway and S3](10.%20CloudFront/2.%20Lab%202%20-%20Integrate%20CloudFront%20with%20API%20Gateway%20and%20S3/2.%20Lab%202%20-%20Integrate%20CloudFront%20with%20API%20Gateway%20and%20S3.md) | Cấu hình CloudFront Multi-Origin phân luồng định tuyến tĩnh (S3) và động (API Gateway) qua Cache Behaviors, Cache Policy và Origin Request Policy | AWS CloudFront, AWS API Gateway, Multi-Origin, CachingDisabled, AllViewer |
 
+### 14. Hướng dẫn thực hành Route 53 (Route 53 Hands-on Labs)
+
+Các hướng dẫn thực hành cấu hình hệ thống tên miền (DNS), quản lý định tuyến lưu lượng và giám sát sức khỏe bằng Amazon Route 53:
+
+| File | Mô tả | Công nghệ |
+|------|-------|-----------|
+| [1. Lab 1 – Đăng ký tên miền (Register Domain)](11.%20Route%2053/1.%20Lab%201%20-%20Register%20Domain/1.%20Lab%201%20-%20Register%20Domain.md) | Đăng ký mua và sở hữu tên miền riêng trực tiếp trên Route 53 và tắt Auto-renew | AWS Route 53, Domain Registration |
+| [2. Lab 2 – Thực hành A-Record & Root Domain](11.%20Route%2053/2.%20Lab%202%20-%20A-Record%20and%20Root%20Domain%20to%20EC2/2.%20Lab%202%20-%20A-Record%20and%20Root%20Domain%20to%20EC2.md) | Cấu hình bản ghi A trỏ subdomain và root domain (hoặc sử dụng ALIAS trỏ ELB) về máy chủ web EC2 | AWS Route 53, A-Record, ALIAS, EC2 |
+| [3. Lab 3 – Thực hành CNAME Record](11.%20Route%2053/3.%20Lab%203%20-%20CNAME%20Record/3.%20Lab%203%20-%20CNAME%20Record.md) | Liên kết subdomain qua CNAME tới CloudFront, tích hợp xác thực DNS để cấp SSL từ ACM | AWS Route 53, CNAME, AWS ACM, CloudFront |
+| [4. Lab 4 – Route 53 Health Check & Failover](11.%20Route%2053/4.%20Lab%204%20-%20Route%2053%20Health%20Check/4.%20Lab%204%20-%20Route%2053%20Health%20Check.md) | Thiết lập Health Check giám sát EC2 chính và cấu hình Failover routing chuyển hướng sang S3 dự phòng | AWS Route 53, Health Check, Failover Routing |
+| [5. Lab 5 – Thực hành Private Hosted Zone](11.%20Route%2053/5.%20Lab%205%20-%20Private%20Hosted%20Zone/5.%20Lab%205%20-%20Private%20Hosted%20Zone.md) | Cấu hình phân giải tên miền nội bộ giữa các VPC bảo mật, kiểm tra tra cứu thành công từ mạng AWS và bị chặn bên ngoài | AWS Route 53, Private Hosted Zone, VPC |
+
 ---
 
 ## Cấu trúc khuyến nghị
@@ -251,6 +263,23 @@ cloud/aws/lab/
       README.md
     2. Lab 2 - Integrate CloudFront with API Gateway and S3/
       2. Lab 2 - Integrate CloudFront with API Gateway and S3.md
+      README.md
+  11. Route 53/
+    11. Route 53.md
+    1. Lab 1 - Register Domain/
+      1. Lab 1 - Register Domain.md
+      README.md
+    2. Lab 2 - A-Record and Root Domain to EC2/
+      2. Lab 2 - A-Record and Root Domain to EC2.md
+      README.md
+    3. Lab 3 - CNAME Record/
+      3. Lab 3 - CNAME Record.md
+      README.md
+    4. Lab 4 - Route 53 Health Check/
+      4. Lab 4 - Route 53 Health Check.md
+      README.md
+    5. Lab 5 - Private Hosted Zone/
+      5. Lab 5 - Private Hosted Zone.md
       README.md
   README.md
 ```
