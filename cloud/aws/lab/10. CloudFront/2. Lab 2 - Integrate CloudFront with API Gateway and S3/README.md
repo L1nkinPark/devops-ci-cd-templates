@@ -14,12 +14,17 @@ Trước khi tích hợp qua CloudFront, ta cần loại bỏ các lớp xác th
 2. Di chuyển tới mục **Resources** ở menu bên trái > Chọn tài nguyên `/calculate` > phương thức **POST**.
 3. Tại tab **Method request**, kiểm tra cấu hình hiện tại (ở các lab trước đang yêu cầu Cognito Authorizer và API Key). Nhấp chọn nút **Edit** ở góc phải phần *Method request settings*.
 
-   ![Cấu hình Method Request lúc đầu](../../../../images/aws/apigw_method_request_api_key_false.png) *(Hình ảnh minh họa giao diện Method request)*
+   ![Cấu hình Method Request lúc đầu](../../../../images/aws/cloudfront_apigw_method_settings.png)
+   *Hình 1: Trạng thái thiết lập Method Request ban đầu với Authorizer và API Key.*
 
 4. Trong màn hình chỉnh sửa:
    * **Authorization**: Chọn **None** (Chuyển tất cả bộ xác thực về None).
    * **API key required**: Bỏ tích chọn (Thiết lập thành False/Không yêu cầu).
 5. Click chọn **Save**.
+
+   ![Chuyển Authorization về None và tắt API Key](../../../../images/aws/cloudfront_apigw_edit_method.png)
+   *Hình 2: Chuyển cấu hình Method request về None và tắt yêu cầu API key.*
+
 6. **Lưu ý cực kỳ quan trọng:** Sau khi lưu, bạn phải nhấn chọn nút **Deploy API** ở góc trên bên phải > Chọn Stage tương ứng (ví dụ: `dev`) > Click **Deploy** để các thay đổi này chính thức có hiệu lực trên Internet.
 
 ---
@@ -31,6 +36,10 @@ Chúng ta sẽ khai báo thêm API Gateway làm nguồn gốc (Origin) thứ hai
 1. Truy cập dịch vụ **CloudFront** trên AWS Console.
 2. Click chọn Distribution của bạn (ví dụ: `demo-cloudfront` - ID: `E26CV1JX0F3ALC`).
 3. Chuyển sang tab **Origins** > Click chọn nút **Create origin**.
+
+   ![Xem tab Origins hiện tại](../../../../images/aws/cloudfront_apigw_cf_origins.png)
+   *Hình 3: Giao diện tab Origins hiển thị danh sách các nguồn hiện tại - Chọn Create origin.*
+
 4. Thiết lập cấu hình Origin mới:
    * **Origin domain**: Dán địa chỉ Endpoint API Gateway của bạn (ví dụ: `da0brxb62b.execute-api.us-east-1.amazonaws.com`).
    * **Protocol**: Tích chọn **HTTPS only** (API Gateway bắt buộc kết nối bảo mật).
@@ -38,6 +47,9 @@ Chúng ta sẽ khai báo thêm API Gateway làm nguồn gốc (Origin) thứ hai
    * **Name**: Nhập `my-custom-api-gateway` (hoặc tên bất kỳ bạn tự chọn).
    * Các mục khác giữ nguyên mặc định.
 5. Click chọn nút **Create origin**.
+
+   ![Cấu hình Create Origin trỏ tới API Gateway](../../../../images/aws/cloudfront_apigw_cf_create_origin.png)
+   *Hình 4: Thiết lập thông số và domain API Gateway làm HTTP Origin mới.*
 
 ---
 
