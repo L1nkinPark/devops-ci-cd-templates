@@ -202,9 +202,15 @@ Sau khi tên miền được đăng ký thành công, ta tiến hành tạo bả
 
 ### Bước 4: Kiểm tra kết quả truy cập
 1. Mở một tab ẩn danh trên trình duyệt.
-2. Truy cập trực tiếp qua tên miền phụ riêng của bạn bằng giao thức HTTPS kèm đường dẫn tệp ảnh:
-   `https://web.h1eudayne.click/images/20230408_010527653_iOS.jpg`
-3. **Kết quả:** Hình ảnh hiển thị thành công, giao diện tải nhanh chóng và kết nối được mã hóa HTTPS an toàn (chứng chỉ bảo mật cung cấp bởi Amazon Trust Services).
+2. Truy cập trực tiếp qua tên miền phụ riêng của bạn bằng giao thức HTTPS:
+   `https://web.h1eudayne.click` (hoặc tệp hình ảnh `https://web.h1eudayne.click/images/20230408_010527653_iOS.jpg`).
+3. **Kết quả:** Giao diện trang web tĩnh (DIMENSION) hoặc tệp hình ảnh được hiển thị thành công.
+
+> [!WARNING]
+> **Xử lý sự cố lỗi hiển thị "Not secure" (Không bảo mật) khi truy cập ngay lập tức:**
+> * **Hiện tượng:** Trang web tĩnh vẫn tải được thành công (chứng tỏ DNS CNAME đã hoạt động), nhưng trình duyệt báo lỗi bảo mật đỏ chéo và hiển thị thông điệp "Not secure".
+> * **Nguyên nhân:** Sau khi nhấn **Save changes** trên CloudFront, trạng thái bản phân phối sẽ chuyển sang **Last modified: In progress**. CloudFront cần khoảng **3-5 phút** để đồng bộ hóa Alternate Domain và cài đặt chứng chỉ SSL từ ACM lên toàn bộ mạng lưới Edge Location toàn cầu.
+> * **Khắc phục:** Hãy kiên nhẫn chờ 3-5 phút cho đến khi trạng thái CloudFront chuyển sang thời gian chỉnh sửa cụ thể (đã Deployed xong). Sau đó mở tab ẩn danh mới hoặc xóa cache trình duyệt để truy cập lại, lỗi bảo mật sẽ tự động biến mất và hiển thị biểu tượng kết nối HTTPS an toàn (ổ khóa bảo mật).
 
 ---
 
