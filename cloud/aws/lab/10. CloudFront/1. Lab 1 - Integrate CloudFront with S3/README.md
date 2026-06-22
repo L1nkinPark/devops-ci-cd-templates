@@ -159,5 +159,60 @@ Khi thay đổi mã nguồn trên S3, để khách hàng nhận được giao di
 
 ---
 
+## PHẦN MỞ RỘNG: Sử dụng Tên miền Tùy chỉnh (Custom Domain) & SSL/TLS Certificate (Route 53 & ACM)
+
+*(Tính năng nâng cao giúp thay thế tên miền mặc định của CloudFront bằng tên miền thương hiệu riêng của bạn)*
+
+### Bước 1: Mua và đăng ký tên miền riêng trên AWS Route 53
+1. Truy cập dịch vụ **Route 53** trên AWS Console.
+2. Di chuyển tới mục **Registered domains** (Tên miền đã đăng ký) ở menu bên trái.
+3. Nhấp chọn nút **Register domains** để tìm kiếm và mua tên miền.
+4. Nhập tên miền muốn đăng ký (Ví dụ thực tế trong lab: `h1eudayne.click` với giá 3.00 USD).
+5. Nhấp chọn tên miền mong muốn > chọn **Proceed to checkout**.
+6. Điền đầy đủ thông tin liên hệ đăng ký, thực hiện thanh toán và xác nhận đăng ký tên miền.
+7. Để kiểm tra trạng thái đăng ký tên miền:
+   * Vào Route 53 > **Requests** ở menu bên trái.
+   * Xác nhận trạng thái (Status) của yêu cầu đăng ký `Register domain` cho tên miền `h1eudayne.click` đã hiển thị là **Successful** (Thành công). Lúc này, Route 53 cũng sẽ tự động tạo một Hosted Zone tương ứng cho tên miền này.
+
+### Bước 2: Yêu cầu chứng chỉ SSL/TLS miễn phí qua AWS Certificate Manager (ACM)
+Để website chạy qua giao diện HTTPS của Custom Domain, chúng ta cần chứng chỉ SSL từ ACM:
+1. Truy cập dịch vụ **AWS Certificate Manager (ACM)**.
+2. **Lưu ý quan trọng:** Bạn phải chuyển Region của console sang **`us-east-1` (N. Virginia)** vì CloudFront chỉ chấp nhận chứng chỉ ACM được tạo ở Region này.
+3. Chọn **Request a certificate** > Tích chọn **Request a public certificate** > Click **Next**.
+4. Thiết lập cấu hình chứng chỉ:
+   * **Domain names:** Nhập tên miền của bạn (ví dụ: `h1eudayne.click` và tên miền phụ dạng wildcard `*.h1eudayne.click` để dự phòng).
+   * **Validation method:** Chọn **DNS validation - recommended** (Xác thực qua DNS).
+5. Click **Request**.
+6. Sau khi chứng chỉ được tạo ở trạng thái *Pending verification*, click chọn chứng chỉ vừa tạo > Chọn nút **Create records in Route 53** để tự động thêm bản ghi CNAME xác thực sở hữu tên miền vào Hosted Zone trên Route 53.
+7. Chờ khoảng 2-5 phút để trạng thái của chứng chỉ chuyển sang **Issued** (Đã cấp phát).
+
+### Bước 3: Cấu hình Custom Domain (Alternate Domain Names) cho CloudFront
+1. Quay lại trang dịch vụ **CloudFront** > click chọn distribution `demo-cloudfront`.
+2. Tại tab **General**, cuộn xuống tìm phần **Settings** và chọn **Edit**.
+3. Cấu hình Alternate Domain:
+   * **Alternate domain name (CNAME):** Click **Add item** và điền tên miền riêng của bạn (ví dụ: `h1eudayne.click`).
+   * **Custom SSL certificate:** Tích chọn chứng chỉ SSL ACM tương ứng với tên miền `h1eudayne.click` mà bạn vừa tạo ở Bước 2.
+4. Cuộn xuống cuối trang và click chọn **Save changes**.
+
+### Bước 4: Tạo bản ghi DNS trên Route 53 trỏ về CloudFront
+1. Quay lại dịch vụ **Route 53** > **Hosted zones** > Click chọn hosted zone tên miền của bạn (`h1eudayne.click`).
+2. Nhấp chọn nút **Create record**.
+3. Cấu hình bản ghi trỏ tên miền về CDN:
+   * **Record name:** Để trống (để trỏ trực tiếp tên miền gốc `h1eudayne.click`).
+   * **Record type:** Chọn **A - Routes traffic to IPv4 address and some AWS resources**.
+   * **Alias:** Tích chọn nút gạt **Alias** (Bật tính năng định danh Alias của AWS).
+   * **Route traffic to:**
+     * Chọn *Alias to CloudFront distribution*.
+     * Chọn đúng tên miền phân phối CloudFront Distribution của bạn (dạng `dyef164pbgy7w.cloudfront.net`).
+4. Click chọn **Create records** để lưu cấu hình.
+
+### Bước 5: Kiểm tra kết quả
+1. Mở một tab ẩn danh trên trình duyệt.
+2. Truy cập trực tiếp qua tên miền riêng của bạn bằng HTTPS:
+   `https://h1eudayne.click/index.html` (hoặc tệp ảnh `https://h1eudayne.click/images/20230408_010527653_iOS.jpg`)
+3. **Kết quả:** Website/Hình ảnh hiển thị thành công. Khi nhấp vào biểu tượng khóa trên trình duyệt, thông tin chứng chỉ SSL hiển thị hợp lệ và an toàn (cung cấp bởi Amazon Trust Services).
+
+---
+
 * **Bài trước**: Không có
 * **Bài tiếp theo**: [2. Lab 2 – Sử dụng CloudFront kết hợp với API Gateway and S3](../2.%20Lab%202%20-%20Integrate%20CloudFront%20with%20API%20Gateway%20and%20S3/2.%20Lab%202%20-%20Integrate%20CloudFront%20with%20API%20Gateway%20and%20S3.md)
