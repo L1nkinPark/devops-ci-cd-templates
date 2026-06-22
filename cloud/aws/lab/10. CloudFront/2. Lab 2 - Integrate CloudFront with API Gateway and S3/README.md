@@ -110,5 +110,99 @@ Sau khi cấu hình hoàn tất và CloudFront đã deploy xong (trạng thái L
 
 ---
 
+## PHẦN MỞ RỘNG: Bật Lambda Proxy Integration & Cấu hình Custom Header từ CloudFront
+
+*(Mục tiêu: Cấu hình API Gateway chuyển tiếp đầy đủ thông tin request xuống Lambda dạng structured event để in ra và kiểm nghiệm custom header `Source: CloudFront` do CloudFront tự động đính kèm khi gửi request tới Origin).*
+
+### Bước 1: Bật Lambda Proxy Integration trên API Gateway
+Mặc định, API Gateway không truyền đầy đủ headers và metadata của request xuống Lambda trừ khi ta kích hoạt tính năng Proxy Integration:
+1. Vào **API Gateway** > Chọn API `test-api` (`da0brxb62b`) > **Resources** > Chọn `/calculate` > phương thức **POST**.
+2. Nhấp chọn tab **Integration request**.
+
+   ![Xem cấu hình Integration Request](../../../../../images/aws/cloudfront_apigw_lambda_proxy_settings.png)
+   *Hình 8: Giao diện Integration request hiển thị trạng thái Lambda proxy integration ban đầu đang tắt (False).*
+
+3. Click nút **Edit** ở góc phải mục *Integration request settings*.
+4. Gạt nút bật **Lambda proxy integration** (chuyển sang trạng thái True).
+5. Click chọn **Save**.
+
+   ![Bật Lambda proxy integration](../../../../../images/aws/cloudfront_apigw_edit_lambda_proxy.png)
+   *Hình 9: Kích hoạt Lambda proxy integration và click Save.*
+
+6. **Quan trọng:** Chọn **Deploy API** lên stage `dev` để cập nhật cấu hình mới lên Internet.
+
+### Bước 2: Cấu hình Custom Header trên CloudFront Origin
+Ta sẽ cấu hình CloudFront tự động đính kèm thêm một header riêng khi gửi yêu cầu tới API Gateway:
+1. Vào trang dịch vụ **CloudFront** > click chọn distribution `demo-cloudfront` (`E26CV1JX0F3ALC`).
+2. Chuyển tới tab **Origins** > Tích chọn Origin API Gateway (`my-custom-api-gateway`) > Click **Edit**.
+
+   ![Chọn Edit Origin trong CloudFront](../../../../../images/aws/cloudfront_apigw_edit_origin_tab.png)
+   *Hình 10: Chọn Origin my-custom-api-gateway và nhấp Edit.*
+
+3. Cuộn xuống mục **Add custom header - optional**:
+   * **Header name:** Nhập `Source`
+   * **Value:** Nhập `CloudFront`
+4. Click chọn **Save changes**.
+
+   ![Thêm custom header](../../../../../images/aws/cloudfront_apigw_edit_origin_custom_header.png)
+   *Hình 11: Cấu hình thêm Custom Header Source: CloudFront cho API Gateway Origin.*
+
+### Bước 3: Cập nhật mã nguồn Lambda để đọc Header và Body
+Khi bật Lambda Proxy, cấu trúc dữ liệu truyền vào hàm Lambda (`event`) thay đổi sang định dạng JSON có khóa `headers` và `body` dạng string.
+1. Cập nhật mã nguồn hàm Lambda backend của bạn theo tệp mẫu [calculator-lambda-new.py](calculator-lambda-new.py):
+   ```python
+   import json
+
+   def lambda_handler(event, context):
+       # Log thông tin debug
+       print('DEBUG INPUT FROM CLIENT:')
+       print(event)
+       
+       headers = event['headers']
+       body = json.loads(event['body'])
+       
+       print('DEBUG HEADER FROM CLIENT:')
+       print(headers)
+       
+       print('DEBUG BODY FROM CLIENT:')
+       print(body)
+       
+       firstNum = body['firstNum']
+       secondNum = body['secondNum']
+       operator = body['operator']
+       
+       result = calculate(firstNum, secondNum, operator)
+       
+       response_body = {
+           'message': 'Request processed successfully',
+           'result': result
+       }
+       
+       response = {
+           'statusCode': 200,
+           'body': json.dumps(response_body),
+           'headers': {
+               'Content-Type': 'application/json'
+           }
+       }
+       return response
+
+   def calculate(num1, num2, operator):
+       if operator == 'ADD':
+           return num1 + num2
+       elif operator == 'SUBSTRACT':
+           return num1 - num2
+       elif operator == 'MULTIPLE':
+           return num1 * num2
+       elif operator == 'DEVIDE':
+           return num1 / num2
+       else:
+           return 0
+   ```
+2. Lưu và nhấn **Deploy** code trên AWS Lambda Console.
+3. Khi bạn gửi request qua Postman hoặc xem log trên **Amazon CloudWatch Logs**, bạn sẽ thấy các log debug in ra thông tin headers và body, đặc biệt là sự xuất hiện của custom header `'source': 'CloudFront'` được chuyển tiếp thành công từ CloudFront CDN xuống Lambda.
+
+---
+
 * **Bài trước**: [1. Lab 1 – Sử dụng CloudFront kết hợp với S3](../1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3.md)
 * **Bài tiếp theo**: Sắp ra mắt (Coming soon...)
