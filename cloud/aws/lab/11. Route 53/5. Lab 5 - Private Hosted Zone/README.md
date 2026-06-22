@@ -6,87 +6,110 @@
 
 ## Các bước thực hiện chi tiết
 
-### Bước 1: Chuẩn bị hai mạng ảo VPC và kích hoạt tính năng DNS
-Trước hết, ta cần đảm bảo các mạng VPC được phép phân giải tên miền do AWS cung cấp:
-1. Mở dịch vụ **VPC** trên AWS Console.
-2. Tạo (hoặc sử dụng) hai VPC ở cùng một Region:
-   * **VPC-A:** Dải CIDR `10.0.0.0/16` (ví dụ: `vpc-a-tokyo`).
-   * **VPC-B:** Dải CIDR `172.16.0.0/16` (ví dụ: `vpc-b-tokyo`).
-3. **Kích hoạt tính năng DNS cho từng VPC:**
-   * Tại danh sách VPC, tích chọn **VPC-A** > Click chọn nút **Actions** ở góc trên bên phải > Chọn **Edit VPC settings**.
-   * Tại màn hình cấu hình, tích chọn cả hai ô:
-     * **Enable DNS resolution** (Bật phân giải DNS).
-     * **Enable DNS hostnames** (Bật cấp phát DNS hostname).
-   * Click chọn **Save**.
-   * Thực hiện tương tự các bước trên đối với **VPC-B**.
+### Bước 1: Khởi tạo hai EC2 Instance (A & B) và bật tính năng DNS trên VPC
+Để thực hành phân giải tên miền nội bộ, trước hết chúng ta cần tạo 2 máy chủ EC2 cùng nằm trong một mạng ảo VPC:
+1. Mở dịch vụ **EC2** trên AWS Console > Click chọn **Launch instances**.
+2. Khởi tạo 2 máy chủ ảo với các thông số sau:
+   * **Instance A**: Đặt tên là `test-instance-a` (ví dụ sử dụng Instance Type `t3.micro`).
+   * **Instance B**: Đặt tên là `test-instance-b` (ví dụ sử dụng Instance Type `t3.micro`).
+   * **Network Settings**: Đảm bảo chọn cùng một mạng ảo **VPC** (ví dụ: `vpc-0460a69665fa27c10`) và **bắt buộc chọn Enable** tại mục **Auto-assign public IP** để chúng ta có thể SSH từ máy cá nhân vào cấu hình.
+3. Sau khi khởi tạo thành công, ghi nhận lại địa chỉ **Private IP** của cả hai Server:
+   * **Server A (test-instance-a)**: `172.31.20.214`
+   * **Server B (test-instance-b)**: `172.31.22.89`
+
+![Các máy chủ EC2 được tạo thành công](../../../../../images/aws/route53_lab5_ec2_instances.png)
+
+4. **Kích hoạt tính năng DNS cho mạng VPC (Nếu chưa bật):**
+   * Truy cập dịch vụ **VPC** trên AWS Console.
+   * Chọn VPC đang sử dụng (`vpc-0460a69665fa27c10`) > Click **Actions** > Chọn **Edit VPC settings**.
+   * Đảm bảo hai ô cấu hình sau đã được tích chọn:
+     * **Enable DNS resolution** (Cho phép phân giải DNS).
+     * **Enable DNS hostnames** (Cấp phát DNS hostname).
+   * Click **Save** để lưu lại thiết lập.
 
 ---
 
-### Bước 2: Khởi tạo Private Hosted Zone và Liên kết VPC-A
-1. Mở dịch vụ **Route 53** > Click chọn **Hosted zones** > Click chọn nút **Create hosted zone**.
-2. Thiết lập thông số Hosted Zone:
-   * **Domain name:** Nhập tên miền nội bộ bạn muốn sử dụng (ví dụ: `corp.internal`).
-   * **Type:** Tích chọn **Private hosted zone** (Vùng lưu trữ bản ghi nội bộ).
-   * **VPCs to associate with the hosted zone:**
-     * **Region:** Chọn đúng Region chứa các VPC của bạn (ví dụ: *ap-northeast-1*).
-     * **VPC ID:** Chọn **VPC-A** từ danh sách gợi ý.
-3. Click chọn nút **Create hosted zone**.
+### Bước 2: Tạo Private Hosted Zone liên kết với VPC
+Chúng ta sẽ tạo một vùng phân giải tên miền riêng tư và gán nó vào VPC chứa các máy chủ trên:
+1. Truy cập dịch vụ **Route 53** > Chọn **Hosted zones** trong menu bên trái. Lúc này, trên hệ thống chỉ có sẵn bản ghi Public Hosted Zone ban đầu (ví dụ: `h1eudayne.click`).
+
+![Giao diện Hosted zones hiện tại](../../../../../images/aws/route53_lab5_hostedzone_dashboard.png)
+
+2. Click chọn nút **Create hosted zone** ở góc trên bên phải.
+3. Thiết lập cấu hình zone nội bộ như sau:
+   * **Domain name**: Nhập tên miền riêng tư muốn dùng, ví dụ: `test.local`.
+   * **Type**: Chọn **Private hosted zone** (Vùng lưu trữ bản ghi nội bộ).
+   * **VPCs to associate with the hosted zone**:
+     * **Region**: Chọn đúng Region chứa các EC2 của bạn (ví dụ: *US East (N. Virginia) / us-east-1*).
+     * **VPC ID**: Chọn VPC ID tương ứng (`vpc-0460a69665fa27c10`).
+   * **Tags**: Đặt tag Name là `test-private-hosted-zone` để dễ quản lý.
+
+![Tạo Private Hosted Zone trên Route 53](../../../../../images/aws/route53_lab5_create_private_hz.png)
+
+4. Click chọn nút **Create hosted zone** ở cuối trang để hoàn tất khởi tạo.
 
 ---
 
-### Bước 3: Liên kết thêm VPC-B vào Private Hosted Zone
-Mặc định lúc khởi tạo, Hosted Zone chỉ mới được liên kết với VPC-A. Ta cần liên kết thêm VPC-B để các máy chủ trong VPC-B cũng có thể tra cứu được tên miền này:
-1. Tại giao diện chi tiết của Hosted Zone `corp.internal` vừa tạo, tìm tab **Hosted zone details**.
-2. Tại mục **VPCs**, bạn sẽ thấy danh sách các VPC đang được liên kết. Click chọn nút **Edit** hoặc **Associate VPC**.
-3. Chọn Region và tiếp tục chọn **VPC-B** từ danh sách > Click chọn **Associate**.
-4. Click chọn **Save changes** (hoặc **Associate**). Lúc này cả hai VPC đều đã được gắn kết với vùng DNS nội bộ.
+### Bước 3: Tạo bản ghi A-Record trỏ tới các Server tương ứng
+Bây giờ, chúng ta sẽ định nghĩa các tên miền nội bộ tương ứng với Private IP của Server A và Server B:
+1. Nhấp chọn Hosted Zone `test.local` vừa tạo.
+2. Click chọn nút **Create record**.
+3. Cấu hình bản ghi đầu tiên dành cho **Server A**:
+   * **Record name**: Nhập `server-a` (tên miền đầy đủ sẽ là `server-a.test.local`).
+   * **Record type**: Chọn **A – Routes traffic to an IPv4 address and some AWS resources**.
+   * **Value**: Nhập địa chỉ Private IP của Server A (`172.31.20.214`).
+   * **TTL (seconds)**: Nhập `300` (5 phút).
+   * **Routing policy**: Chọn `Simple routing`.
+   * Click **Create records**.
+4. Tiếp tục click chọn **Create record** để cấu hình bản ghi cho **Server B**:
+   * **Record name**: Nhập `server-b` (tên miền đầy đủ sẽ là `server-b.test.local`).
+   * **Record type**: Chọn **A – Routes traffic to an IPv4 address...**
+   * **Value**: Nhập địa chỉ Private IP của Server B (`172.31.22.89`).
+   * **TTL (seconds)**: Nhập `300`.
+   * **Routing policy**: Chọn `Simple routing`.
+   * Click **Create records**.
+
+Sau khi hoàn tất, danh sách bản ghi DNS nội bộ sẽ hiển thị như sau:
+
+![Các bản ghi A-Record được cấu hình thành công](../../../../../images/aws/route53_lab5_hz_records.png)
 
 ---
 
-### Bước 4: Tạo EC2 trong VPC-A và Cấu hình Bản ghi DNS A nội bộ
-1. Vào dịch vụ **EC2** > Khởi tạo một instance trong **VPC-A** (ví dụ tên: `app-server-vpc-a`).
-2. Nhấp chọn instance vừa tạo, di chuyển xuống tab **Details** và sao chép địa chỉ **Private IPv4 address** của máy chủ này (ví dụ: `10.0.1.10`).
-3. Quay lại **Route 53** > Hosted Zone `corp.internal`.
-4. Click chọn **Create record** và cấu hình bản ghi nội bộ:
-   * **Record name:** Nhập `db` (tên miền nội bộ đầy đủ sẽ là `db.corp.internal`).
-   * **Record type:** Chọn **A – Routes traffic to an IPv4 address...**
-   * **Alias:** Để tắt (**No**).
-   * **Value:** Dán địa chỉ Private IP của EC2 trong VPC-A vừa sao chép (`10.0.1.10`).
-   * **TTL (seconds):** Giữ mặc định `300`.
-   * **Routing policy:** Chọn `Simple routing`.
-5. Click chọn **Create records**.
+### Bước 4: Cấu hình Security Group cho phép ping nội bộ
+Để Server A và Server B có thể giao tiếp qua lệnh `ping` (sử dụng giao thức ICMP), ta cần cấu hình Inbound Rules cho Security Group (SG) của chúng:
+1. Truy cập dịch vụ **EC2** > Tìm đến mục **Security Groups** ở menu bên trái.
+2. Nhấp chọn Security Group đang được gán cho 2 máy chủ trên (ví dụ: `sg-0fc685007c429a5c9`).
+3. Chuyển sang tab **Inbound rules** và click chọn nút **Edit inbound rules**.
+4. Thêm một quy tắc (Rule) mới:
+   * **Type**: Chọn **All ICMP - IPv4**.
+   * **Source**: Chọn **Custom** và dán chính **Security Group ID** đó (`sg-0fc685007c429a5c9`). Điều này cho phép bất kỳ máy chủ nào cùng sử dụng Security Group này đều có thể gửi tin nhắn ICMP (ping) tới nhau một cách an toàn.
+
+![Cấu hình quy tắc Inbound cho Security Group](../../../../../images/aws/route53_lab5_sg_icmp.png)
+
+5. Click chọn **Save rules** để áp dụng thay đổi.
 
 ---
 
-### Bước 5: Kiểm thử phân giải tên miền nội bộ
-Để xác minh DNS hoạt động, ta sẽ đăng nhập vào một máy chủ nằm ngoài VPC-A nhưng vẫn nằm trong mạng liên kết (VPC-B):
-
-#### 1. Kiểm thử từ bên trong mạng AWS (EC2 trong VPC-B)
-1. Khởi tạo một EC2 Instance phụ trong **VPC-B** (ví dụ tên: `client-vpc-b`), cấu hình gán Public IP để có thể SSH vào kiểm thử.
-2. Sử dụng Terminal/PowerShell để SSH vào máy chủ `client-vpc-b`.
-3. Chạy lệnh sau để kiểm tra phân giải DNS nội bộ:
+### Bước 5: Đăng nhập vào Server A và ping tới Server B để kiểm nghiệm
+1. Mở Terminal/PowerShell trên máy tính cá nhân của bạn.
+2. SSH vào **Server A (test-instance-a)** bằng Public IP của nó (ví dụ: `3.80.230.230`):
    ```bash
-   nslookup db.corp.internal
+   ssh -i "path/to/your-key.pem" ec2-user@3.80.230.230
    ```
-4. **Kết quả trả về chính xác:**
+3. Sau khi kết nối thành công vào Server A, thực hiện lệnh `ping` tới Server B bằng tên miền nội bộ:
+   ```bash
+   ping server-b.test.local
+   ```
+4. **Kết quả kỳ vọng**:
+   * Tên miền `server-b.test.local` được phân giải thành công sang Private IP của Server B là `172.31.22.89`.
+   * Các gói tin ICMP được gửi và nhận phản hồi bình thường (do ta đã mở quy tắc Inbound cho Security Group ở Bước 4):
    ```text
-   Server:         172.16.0.2
-   Address:        172.16.0.2#53
-
-   Non-authoritative answer:
-   Name:   db.corp.internal
-   Address: 10.0.1.10
+   PING server-b.test.local (172.31.22.89) 56(84) bytes of data.
+   64 bytes from server-b.test.local (172.31.22.89): icmp_seq=1 ttl=64 time=0.482 ms
+   64 bytes from server-b.test.local (172.31.22.89): icmp_seq=2 ttl=64 time=0.448 ms
+   64 bytes from server-b.test.local (172.31.22.89): icmp_seq=3 ttl=64 time=0.435 ms
    ```
-   Tên miền nội bộ `db.corp.internal` đã được dịch chuyển thành công sang IP `10.0.1.10` nhờ máy chủ DNS mặc định của VPC-B (`172.16.0.2`).
-   
+
    > [!NOTE]
-   > **Lưu ý về kết nối mạng:**
-   > Việc Private Hosted Zone phân giải thành công tên miền `db.corp.internal` ra địa chỉ IP `10.0.1.10` chỉ là bước **dịch nghĩa địa chỉ (DNS Resolution)**. Để máy chủ ở VPC-B có thể thực sự ping hoặc truyền dữ liệu kết nối tới máy chủ ở VPC-A, bạn cần thiết lập thêm hạ tầng kết nối mạng thực tế giữa 2 VPC như **VPC Peering** hoặc **Transit Gateway**.
-
-#### 2. Kiểm thử từ máy tính cá nhân ngoài Internet
-1. Mở Command Prompt hoặc PowerShell trên máy tính cá nhân của bạn ở nhà (đang kết nối mạng internet thông thường).
-2. Chạy lệnh:
-   ```powershell
-   nslookup db.corp.internal
-   ```
-3. **Kết quả:** Hệ thống báo lỗi không tìm thấy tên miền (`Non-existent domain` hoặc `NXDOMAIN`). Điều này xác minh tên miền `db.corp.internal` được bảo vệ hoàn toàn và chỉ có giá trị phân giải an toàn bên trong các VPC đã khai báo.
+   > **Kiểm thử từ bên ngoài Internet:**
+   > Nếu bạn chạy lệnh `nslookup server-b.test.local` hoặc `ping server-b.test.local` trực tiếp từ máy tính cá nhân ở nhà (ngoài Internet), hệ thống DNS công cộng sẽ báo lỗi không tìm thấy tên miền (`NXDOMAIN`). Điều này khẳng định tên miền `*.test.local` chỉ hoạt động bảo mật và được giải quyết bên trong hạ tầng mạng đám mây VPC đã khai báo.
