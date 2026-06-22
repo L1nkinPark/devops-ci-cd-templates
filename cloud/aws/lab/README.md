@@ -277,6 +277,7 @@ cloud/aws/lab/
       README.md
     3. Lab 3 - CNAME Record/
       3. Lab 3 - CNAME Record.md
+      Note - CloudFront and Certificate Manager.md
       README.md
     4. Lab 4 - Route 53 Health Check/
       4. Lab 4 - Route 53 Health Check.md
