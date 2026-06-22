@@ -64,7 +64,7 @@ Các hướng dẫn thực hành deploy ứng dụng và cấu hình hạ tầng
 |------|-------|-----------------------|
 | [1. Amazon EC2 Hands-on Lab(Linux)](1.%20EC2/1.%20Amazon%20EC2%20Hands-on%20Lab%28Linux%29.md) | Khởi tạo EC2 Linux, SSH từ Windows, cài đặt httpd, Snapshot/AMI | SSH, HTTP, Apache |
 | [2. Amazon EC2 Hands-on Lab(Windows)](1.%20EC2/2.%20Amazon%20EC2%20Hands-on%20Lab%28Windows%29.md) | Khởi tạo EC2 Windows Server, giải mã mật khẩu Administrator, đăng nhập RDP | RDP, Windows Server |
-| [3. Amazon EC2 User Data and Metadata Lab](1.%20EC2/3.%20Amazon%20EC2%20User%20Data%20and%20Metadata%20Lab.md) | Tự động hóa cài đặt Web Server và lấy IP động qua IMDSv2 | User Data, IMDSv2, Bash |
+| [3. Amazon EC2 User Data and Metadata Lab](1.%20EC2/3.%20Amazon%20EC2%20User%20Data%20and%20Metadata%20Lab/3.%20Amazon%20EC2%20User%20Data%20and%20Metadata%20Lab.md) | Tự động hóa cài đặt Web Server và lấy IP động qua IMDSv2 | User Data, IMDSv2, Bash |
 | [4. Amazon EC2 Hands-on Lab(Windows Volume)](1.%20EC2/4.%20Amazon%20EC2%20Hands-on%20Lab%28Windows%20Volume%29.md) | Tạo EBS Volume, gắn vào instance, online và định dạng NTFS | EBS, Windows Disk Mgmt |
 | [5. Amazon EC2 Hands-on Lab(Linux Volume)](1.%20EC2/5.%20Amazon%20EC2%20Hands-on%20Lab%28Linux%20Volume%29.md) | EBS volume, fdisk phân vùng, định dạng XFS, cấu hình auto-mount trong /etc/fstab, mở rộng dung lượng trực tuyến | EBS, fdisk, XFS, growpart |
 | [6. Amazon EC2 Hands-on Lab(Add Member SSH)](1.%20EC2/6.%20Amazon%20EC2%20Hands-on%20Lab%28Add%20Member%20SSH%29.md) | Tạo user dev01, cấu hình phân quyền thư mục .ssh (700) và authorized_keys (600) | SSH, Linux Security |
@@ -196,7 +196,10 @@ cloud/aws/lab/
   1. EC2/
     1. Amazon EC2 Hands-on Lab(Linux).md
     2. Amazon EC2 Hands-on Lab(Windows).md
-    3. Amazon EC2 User Data and Metadata Lab.md
+    3. Amazon EC2 User Data and Metadata Lab/
+      3. Amazon EC2 User Data and Metadata Lab.md
+      README.md
+      user_data.sh
     4. Amazon EC2 Hands-on Lab(Windows Volume).md
     5. Amazon EC2 Hands-on Lab(Linux Volume).md
     6. Amazon EC2 Hands-on Lab(Add Member SSH).md
