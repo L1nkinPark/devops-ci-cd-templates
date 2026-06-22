@@ -35,7 +35,8 @@ Trước khi bắt đầu thực hành, hãy nắm rõ sự khác biệt giữa 
 1. Đăng nhập vào AWS Console, tìm kiếm dịch vụ **CloudFront**.
 2. Tại màn hình quản lý Distributions, click chọn **Create distribution**.
 
-   ![Giao diện CloudFront Distributions Dashboard](../../../../images/aws/cloudfront_logo.png) *(Hoặc nhấn nút Create distribution tại màn hình chính)*
+   ![Giao diện CloudFront Distributions Dashboard](../../../../images/aws/cloudfront_s3_step1_dashboard.png)
+   *Hình 1: Màn hình quản lý CloudFront Distributions - Click Create distribution.*
 
 3. **Cấu hình Step 2 - Get started (Bắt đầu):**
    * **Distribution name:** Nhập `demo-cloudfront`.
@@ -44,6 +45,9 @@ Trước khi bắt đầu thực hành, hãy nắm rõ sự khác biệt giữa 
    * **Domain (Route 53 managed domain - optional):** Để trống nếu chưa cấu hình DNS Route 53.
    * Click **Next**.
 
+   ![Cấu hình Step 2: Get started](../../../../images/aws/cloudfront_s3_step2_get_started.png)
+   *Hình 2: Khai báo Distribution name và chọn Single website or app.*
+
 4. **Cấu hình Step 3 - Specify origin (Xác định nguồn phát):**
    * **Origin type:** Chọn **Amazon S3**.
    * **S3 origin:** Nhập hoặc dán địa chỉ S3 Website Endpoint của bạn:
@@ -51,6 +55,9 @@ Trước khi bắt đầu thực hành, hãy nắm rõ sự khác biệt giữa 
    * **Origin settings:** Tích chọn **Use recommended origin settings** (Sử dụng cấu hình đề xuất).
    * **Cache settings:** Tích chọn **Use recommended cache settings tailored to serving S3 content** (Sử dụng chính sách bộ đệm tối ưu cho S3).
    * Click **Next**.
+
+   ![Cấu hình Step 3: Specify origin](../../../../images/aws/cloudfront_s3_step3_specify_origin.png)
+   *Hình 3: Cấu hình Origin trỏ tới S3 Static Website Hosting Endpoint và dùng recommended settings.*
 
 5. **Cấu hình Step 4 - Enable security (Kích hoạt bảo mật):**
    * AWS mặc định đề xuất bật WAF bảo vệ. Trong lab này, hệ thống cấu hình **Security protections: Enabled** (WAF được bật ở chế độ cơ bản).
@@ -63,6 +70,9 @@ Trước khi bắt đầu thực hành, hãy nắm rõ sự khác biệt giữa 
      * **Cache settings:** Áp dụng mặc định cho S3.
      * **Security:** Security protections: `Enabled`.
    * Nhấp chọn **Create distribution** ở góc dưới cùng bên phải và chờ trạng thái phân phối chuyển sang hoạt động (Deployed/Active).
+
+   ![Kiểm tra và khởi tạo Distribution](../../../../images/aws/cloudfront_s3_step5_review.png)
+   *Hình 4: Review lại toàn bộ thông tin cấu hình trước khi nhấn Create distribution.*
 
 ---
 
@@ -126,6 +136,9 @@ Trước khi bắt đầu thực hành, hãy nắm rõ sự khác biệt giữa 
 1. Truy cập dịch vụ **CloudFront** > click chọn distribution của bạn (`demo-cloudfront`).
 2. Tại tab **Details**, sao chép địa chỉ **Distribution domain name** (Ví dụ thực tế trong lab: `dyef164pbgy7w.cloudfront.net`).
 
+   ![Xem chi tiết Distribution Domain Name](../../../../images/aws/cloudfront_s3_domain_details.png)
+   *Hình 5: Chi tiết bản phân phối CloudFront với tên miền được cấp phát.*
+
 ---
 
 ### 2. So sánh tốc độ tải tài nguyên (Ví dụ với tệp hình ảnh dung lượng 4.7 MB)
@@ -137,12 +150,18 @@ Trước khi bắt đầu thực hành, hãy nắm rõ sự khác biệt giữa 
 * **Kết quả đo lường thực tế:** Thời gian tải tệp tin mất khoảng **3.72 giây (≈ 4s)**.
 * **Nguyên nhân:** Dữ liệu phải được truyền tải trực tiếp từ S3 bucket (nằm tại Region `us-east-1` - Bắc Virginia, Mỹ) vượt khoảng cách địa lý xa xôi về máy người dùng.
 
+   ![Đo lường thời gian tải trực tiếp từ S3](../../../../images/aws/cloudfront_s3_speed_test_s3.png)
+   *Hình 6: Chrome DevTools đo thời gian tải qua S3 Web Endpoint trực tiếp là 3.72s.*
+
 #### Kịch bản 2: Truy cập qua CloudFront Distribution
 * **Địa chỉ truy cập:** `http://dyef164pbgy7w.cloudfront.net/images/20230408_010527653_iOS.jpg`
 * **Kết quả đo lường thực tế:**
   * **Lần đầu tiên (Cache Miss):** Tốc độ tải tương đương với S3 (~4 giây) do CloudFront phải gửi request về S3 để lấy dữ liệu lần đầu và ghi vào Cache.
   * **Từ lần thứ hai trở đi (Cache Hit):** Thời gian tải giảm đột biến chỉ còn **312 miligiây (≈ 300ms)**!
 * **Nguyên nhân:** CloudFront đã lưu tệp hình ảnh vào bộ nhớ đệm tại máy chủ Edge Location gần người dùng nhất. Ở các lượt truy cập sau, tài nguyên được phân phối tức thì từ Edge Location mà không cần quay lại S3 Origin nữa.
+
+   ![Đo lường thời gian tải qua CloudFront Cache](../../../../images/aws/cloudfront_s3_speed_test_cf.png)
+   *Hình 7: Chrome DevTools đo thời gian tải qua CloudFront Cache (Cache Hit) cực nhanh chỉ còn 312ms.*
 
 > [!TIP]
 > Tốc độ cải thiện **gấp hơn 10 lần** (~3.7s giảm xuống còn ~300ms) chính là minh chứng rõ ràng nhất cho hiệu quả của CloudFront Caching khi triển khai các website tĩnh có nhiều tài nguyên hình ảnh, media.
@@ -166,17 +185,32 @@ Khi thay đổi mã nguồn trên S3, để khách hàng nhận được giao di
 ### Bước 1: Mua và đăng ký tên miền riêng trên AWS Route 53
 1. Truy cập dịch vụ **Route 53** trên AWS Console.
 2. Di chuyển tới mục **Registered domains** (Tên miền đã đăng ký) ở menu bên trái.
+
+   ![Route 53 Registered Domains Dashboard](../../../../images/aws/cloudfront_dns_registered_domains.png)
+   *Hình 8: Giao diện Registered domains trong Route 53 - Click Register domains.*
+
 3. Nhấp chọn nút **Register domains** để tìm kiếm và mua tên miền.
 4. Nhập tên miền muốn đăng ký (Ví dụ thực tế trong lab: `h1eudayne.click` với giá 3.00 USD).
+
+   ![Tìm kiếm và chọn mua tên miền](../../../../images/aws/cloudfront_dns_register_search.png)
+   *Hình 9: Chọn tên miền h1eudayne.click vào giỏ hàng và chọn Proceed to checkout.*
+
 5. Nhấp chọn tên miền mong muốn > chọn **Proceed to checkout**.
 6. Điền đầy đủ thông tin liên hệ đăng ký, thực hiện thanh toán và xác nhận đăng ký tên miền.
 7. Để kiểm tra trạng thái đăng ký tên miền:
    * Vào Route 53 > **Requests** ở menu bên trái.
    * Xác nhận trạng thái (Status) của yêu cầu đăng ký `Register domain` cho tên miền `h1eudayne.click` đã hiển thị là **Successful** (Thành công). Lúc này, Route 53 cũng sẽ tự động tạo một Hosted Zone tương ứng cho tên miền này.
 
+   ![Kiểm tra tiến trình đăng ký tên miền](../../../../images/aws/cloudfront_dns_registration_requests.png)
+   *Hình 10: Yêu cầu đăng ký tên miền h1eudayne.click đã hoàn tất thành công.*
+
 ### Bước 2: Tạo bản ghi CNAME trên Route 53 trỏ về CloudFront
 Sau khi tên miền được đăng ký thành công, ta tiến hành tạo bản ghi DNS để kết nối tên miền phụ (subdomain) với CloudFront:
 1. Truy cập Route 53 > **Hosted zones** > Click chọn hosted zone vừa được tạo (`h1eudayne.click`).
+
+   ![Xem thông tin Hosted Zone](../../../../images/aws/cloudfront_dns_hosted_zone.png)
+   *Hình 11: Hosted Zone h1eudayne.click tự động được tạo với các bản ghi mặc định NS, SOA.*
+
 2. Nhấp chọn nút **Create record**.
 3. Cấu hình bản ghi CNAME để trỏ subdomain về CloudFront:
    * **Record name:** Nhập `web` (khi đó tên miền phụ truy cập sẽ là `web.h1eudayne.click`).
@@ -187,16 +221,31 @@ Sau khi tên miền được đăng ký thành công, ta tiến hành tạo bả
    * **Routing policy:** Chọn `Simple routing`.
 4. Click chọn nút **Create records** để lưu bản ghi mới.
 
+   ![Tạo bản ghi CNAME](../../../../images/aws/cloudfront_dns_create_cname.png)
+   *Hình 12: Thiết lập thông số bản ghi CNAME cho subdomain web trỏ về CloudFront.*
+
 ### Bước 3: Khai báo Custom Domain (Alternate Domain Name) và liên kết SSL trong CloudFront
 1. Quay lại trang dịch vụ **CloudFront** > click chọn distribution `demo-cloudfront` của bạn.
 2. Tại tab **General**, cuộn xuống tìm phần **Settings** và chọn **Edit** (hoặc nhấp trực tiếp vào nút **Add domain** ở dưới phần Alternate domain names).
+
+   ![Vào phần General Settings của CloudFront](../../../../images/aws/cloudfront_dns_cf_alternate_names.png)
+   *Hình 13: Màn hình General Settings - Nhấn Add domain tại mục Alternate domain names.*
+
 3. **Màn hình Step 1 - Configure domains:**
    * Tại ô **Domains to serve**, nhập tên miền phụ bạn vừa tạo bản ghi CNAME ở Bước 2: `web.h1eudayne.click`.
    * Click **Next**.
+
+   ![Khai báo Domain phụ trong CloudFront](../../../../images/aws/cloudfront_dns_cf_add_domain.png)
+   *Hình 14: Điền tên miền phụ web.h1eudayne.click vào ô Domains to serve.*
+
 4. **Màn hình Step 2 - Get TLS certificate:**
    * Hệ thống sẽ hiển thị thông báo chứng chỉ TLS dạng wildcard đã được tạo/xác nhận thành công: *"A certificate for *.h1eudayne.click was created successfully."*
    * Tích chọn chứng chỉ tương ứng trong phần **Available certificates** (Ví dụ chứng chỉ có tên miền bao phủ `*.h1eudayne.click` được phát hành tại Region `us-east-1`).
    * Click **Next**.
+
+   ![Liên kết chứng chỉ SSL TLS](../../../../images/aws/cloudfront_dns_cf_tls_certificate.png)
+   *Hình 15: Lựa chọn chứng chỉ SSL bảo mật tương thích cho tên miền phụ.*
+
 5. **Màn hình Step 3 - Review changes:**
    * Xem lại các cấu hình và click chọn **Save changes** để hệ thống áp dụng gán Alternate Domain Name kèm chứng chỉ bảo mật SSL cho bản phân phối.
 
@@ -211,6 +260,9 @@ Sau khi tên miền được đăng ký thành công, ta tiến hành tạo bả
 > * **Hiện tượng:** Trang web tĩnh vẫn tải được thành công (chứng tỏ DNS CNAME đã hoạt động), nhưng trình duyệt báo lỗi bảo mật đỏ chéo và hiển thị thông điệp "Not secure".
 > * **Nguyên nhân:** Sau khi nhấn **Save changes** trên CloudFront, trạng thái bản phân phối sẽ chuyển sang **Last modified: In progress**. CloudFront cần khoảng **3-5 phút** để đồng bộ hóa Alternate Domain và cài đặt chứng chỉ SSL từ ACM lên toàn bộ mạng lưới Edge Location toàn cầu.
 > * **Khắc phục:** Hãy kiên nhẫn chờ 3-5 phút cho đến khi trạng thái CloudFront chuyển sang thời gian chỉnh sửa cụ thể (đã Deployed xong). Sau đó mở tab ẩn danh mới hoặc xóa cache trình duyệt để truy cập lại, lỗi bảo mật sẽ tự động biến mất và hiển thị biểu tượng kết nối HTTPS an toàn (ổ khóa bảo mật).
+> 
+> ![Lỗi Not Secure do độ trễ đồng bộ của CDN](../../../../images/aws/cloudfront_dns_not_secure_warning.png)
+> *Hình 16: Website Dimension tải được qua tên miền riêng nhưng hiển thị Not secure tạm thời do CloudFront đang đồng bộ.*
 
 ---
 
