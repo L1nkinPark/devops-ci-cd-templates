@@ -4,74 +4,96 @@
 
 ---
 
-## Các bước thực hiện chi tiết
+## So sánh hai phương thức tích hợp CloudFront với S3
 
-### Bước 1: Tạo Amazon S3 Bucket và tải tệp trang chủ lên
+Trước khi bắt đầu thực hành, hãy nắm rõ sự khác biệt giữa hai phương thức tích hợp chính dưới đây để áp dụng chính xác cho từng dự án:
 
-Trước tiên, chúng ta cần một kho lưu trữ để chứa các tệp tĩnh của trang web:
+| Tiêu chí | Phương pháp 1: S3 Website Endpoint (Custom HTTP Origin) | Phương pháp 2: S3 REST API Endpoint + OAC (Khuyên dùng) |
+| :--- | :--- | :--- |
+| **Sự phù hợp** | Dành cho các website tĩnh tận dụng tính năng định hướng (routing/redirect rules) của S3 Website Hosting. | Dành cho các website cần bảo mật tối đa, không để lộ dữ liệu nguồn trên S3. |
+| **Chế độ S3 Bucket** | Bắt buộc phải bật **Public Access** và cấu hình public bucket policy. | Bucket ở chế độ **Private hoàn toàn** (Block all public access). |
+| **Bảo mật mạng** | Người dùng vẫn có thể bypass CloudFront truy cập trực tiếp qua S3 HTTP URL. | Chặn hoàn toàn truy cập trực tiếp S3. Chỉ có thể đi qua cổng CloudFront. |
+| **Cơ chế xác thực** | Không sử dụng OAC. CloudFront coi S3 như một máy chủ web ngoài (HTTP). | Sử dụng **Origin Access Control (OAC)** ký số cho mọi request từ CloudFront. |
 
-1. Đăng nhập vào AWS Console, truy cập dịch vụ **Amazon S3** và chọn **Create bucket**.
-2. Thiết lập cấu hình bucket:
-   * **Bucket name**: Nhập một tên duy nhất toàn cầu (ví dụ: `vduc-cloudfront-s3-lab-01`).
-   * **Region**: Chọn region gần bạn (ví dụ: `us-east-1` hoặc `ap-southeast-1`).
-   * **Object Ownership**: Giữ mặc định (*ACLs disabled*).
-   * **Block Public Access settings for this bucket**: Đảm bảo tích chọn **Block *all* public access** để chặn hoàn toàn truy cập công khai.
-3. Click chọn **Create bucket** ở dưới cùng.
-4. Tạo một tệp tin đơn giản tên là `index.html` trên máy tính với nội dung sau:
-   ```html
-   <!DOCTYPE html>
-   <html>
-   <head>
-       <title>CloudFront S3 Lab</title>
-       <meta charset="UTF-8">
-       <style>
-           body { font-family: Arial, sans-serif; text-align: center; padding-top: 100px; background-color: #f4f6f9; }
-           h1 { color: #ff9900; }
-           .container { border: 1px solid #ccc; padding: 20px; background: white; max-width: 600px; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-       </style>
-   </head>
-   <body>
-       <div class="container">
-           <h1>Chào mừng bạn đến với Amazon CloudFront!</h1>
-           <p>Tài nguyên này được lưu trữ an toàn trên Amazon S3 và phân phối qua CloudFront OAC.</p>
-       </div>
-   </body>
-   </html>
-   ```
-5. Click chọn bucket vừa tạo -> Click **Upload** -> Chọn tệp `index.html` vừa tạo và tải lên.
+> [!NOTE]
+> **Lưu ý bổ sung (Cập nhật từ tháng 10/2025):**
+> Kể từ tháng 10/2025, nếu S3 bucket được cấu hình ở chế độ **Private** và **Block all public access** nhưng vẫn bật tính năng **Static Website Hosting**, thì CloudFront vẫn có thể truy cập và phân phối dữ liệu từ S3 Website Endpoint bình thường mà không bị lỗi 403 Forbidden.
 
 ---
+
+## PHƯƠNG PHÁP 1: Tích hợp với S3 Static Website Hosting Endpoint (Theo thực tế cấu hình)
+
+*Phương pháp này tương ứng trực tiếp với cấu hình thực tế trong các ảnh chụp màn hình console của bạn.*
+
+### Bước 1: Chuẩn bị website tĩnh trên S3 (S3 Lab đã hoàn tất)
+1. Đảm bảo bạn đã hoàn thành bài thực hành S3 Static Website Hosting trước đó cho bucket `h1eudayne`.
+2. Kiểm tra trạng thái hoạt động của website tĩnh tại đường link endpoint S3:
+   `http://h1eudayne.s3-website-us-east-1.amazonaws.com`
+   *(Trang web Dimension hoặc trang chủ đơn giản hiển thị thành công).*
 
 ### Bước 2: Khởi tạo CloudFront Distribution
+1. Đăng nhập vào AWS Console, tìm kiếm dịch vụ **CloudFront**.
+2. Tại màn hình quản lý Distributions, click chọn **Create distribution**.
 
-Tiếp theo, ta tạo bản phân phối CloudFront để làm cổng truy cập duy nhất cho S3 bucket:
+   ![Giao diện CloudFront Distributions Dashboard](../../../../images/aws/cloudfront_logo.png) *(Hoặc nhấn nút Create distribution tại màn hình chính)*
 
-1. Truy cập dịch vụ **CloudFront** trên AWS Console.
-2. Click chọn nút **Create distribution**.
-3. Tại mục **Origin**:
-   * **Origin domain**: Nhấp chuột vào ô tìm kiếm và chọn tên S3 bucket vừa tạo ở Bước 1.
-   * **Origin access**: Tích chọn **Origin access control settings (recommended)**.
-   * **Origin access control (OAC)**: Click chọn **Create control setting** ở bên cạnh. Giữ nguyên tên mặc định và nhấn **Create** để hệ thống tạo thực thể OAC liên kết.
-4. Tại mục **Default cache behavior**:
-   * **Viewer protocol policy**: Chọn **Redirect HTTP to HTTPS** để tự động chuyển hướng các request HTTP thường sang HTTPS bảo mật.
-   * **Allowed HTTP methods**: Chọn `GET, HEAD`.
-5. Tại mục **Cache key and origin requests**:
-   * Chọn **Cache policy**: Chọn chính sách mặc định tối ưu **`CachingOptimized`**.
-6. Tại mục **Web Application Firewall (WAF)**:
-   * Chọn **Do not enable security protections** để tránh phát sinh chi phí WAF trong quá trình thực hành Lab.
-7. Cuộn xuống dưới cùng và click chọn **Create distribution**.
+3. **Cấu hình Step 2 - Get started (Bắt đầu):**
+   * **Distribution name:** Nhập `demo-cloudfront`.
+   * **Description - optional:** Nhập `demo-cloudfront`.
+   * **Distribution type:** Tích chọn **Single website or app** (Lưu trữ đơn website hoặc ứng dụng).
+   * **Domain (Route 53 managed domain - optional):** Để trống nếu chưa cấu hình DNS Route 53.
+   * Click **Next**.
+
+4. **Cấu hình Step 3 - Specify origin (Xác định nguồn phát):**
+   * **Origin type:** Chọn **Amazon S3**.
+   * **S3 origin:** Nhập hoặc dán địa chỉ S3 Website Endpoint của bạn:
+     `h1eudayne.s3-website-us-east-1.amazonaws.com`
+   * **Origin settings:** Tích chọn **Use recommended origin settings** (Sử dụng cấu hình đề xuất).
+   * **Cache settings:** Tích chọn **Use recommended cache settings tailored to serving S3 content** (Sử dụng chính sách bộ đệm tối ưu cho S3).
+   * Click **Next**.
+
+5. **Cấu hình Step 4 - Enable security (Kích hoạt bảo mật):**
+   * AWS mặc định đề xuất bật WAF bảo vệ. Trong lab này, hệ thống cấu hình **Security protections: Enabled** (WAF được bật ở chế độ cơ bản).
+   * Click **Next**.
+
+6. **Cấu hình Step 5 - Review and create (Kiểm tra và khởi tạo):**
+   * Xem lại toàn bộ thông tin cấu hình:
+     * **General configuration:** Name: `demo-cloudfront`, Billing: Free ($0/month).
+     * **Origin:** S3 origin: `h1eudayne.s3-website-us-east-1.amazonaws.com`, Origin path: `-`, Connection attempts: `3`.
+     * **Cache settings:** Áp dụng mặc định cho S3.
+     * **Security:** Security protections: `Enabled`.
+   * Nhấp chọn **Create distribution** ở góc dưới cùng bên phải và chờ trạng thái phân phối chuyển sang hoạt động (Deployed/Active).
 
 ---
 
-### Bước 3: Cập nhật S3 Bucket Policy cho phép CloudFront OAC truy cập
+## PHƯƠNG PHÁP 2: Tích hợp bảo mật sử dụng S3 REST API & OAC (Khuyên dùng trong môi trường Product)
 
-Sau khi Distribution được khởi tạo, bạn sẽ thấy một biểu ngữ thông báo màu xanh lá cây ở đầu trang có nội dung: *"The S3 bucket policy needs to be updated..."*.
+*Nếu bạn muốn chuyển sang giải pháp bảo mật cao hơn, hãy làm theo các bước sau đây để khóa S3 Bucket về Private và cấu hình OAC:*
 
-1. Click chọn nút **Copy policy** hiển thị trên biểu ngữ để sao chép đoạn cấu hình JSON tự động sinh ra.
-2. Quay lại dịch vụ **Amazon S3**, click chọn S3 bucket `vduc-cloudfront-s3-lab-01` của bạn.
-3. Di chuyển sang tab **Permissions** (Quyền truy cập).
-4. Cuộn xuống phần **Bucket policy** -> Click chọn **Edit**.
-5. Dán đoạn mã JSON vừa copy ở trên vào ô nhập liệu. Đoạn mã có dạng tương tự như sau:
+### Bước 1: Khóa Public Access của S3 Bucket
+1. Truy cập dịch vụ **Amazon S3** > Click chọn bucket `h1eudayne`.
+2. Di chuyển sang tab **Permissions** (Quyền truy cập).
+3. Tại phần **Block public access (bucket settings)**, click chọn **Edit** > Tích chọn **Block *all* public access** > Nhấn **Save changes** và nhập `confirm`.
+
+### Bước 2: Tạo CloudFront Distribution trỏ tới S3 REST và tạo OAC
+1. Truy cập dịch vụ **CloudFront** > Chọn **Create distribution**.
+2. Cấu hình phần **Origin**:
+   * **Origin domain:** Chọn đúng tên S3 bucket từ danh sách gợi ý (dạng `h1eudayne.s3.amazonaws.com` - đây là REST API endpoint, không chứa chữ `-website`).
+   * **Origin access:** Tích chọn **Origin access control settings (recommended)**.
+   * **Origin access control (OAC):** Nhấn **Create control setting** > Giữ nguyên tên mặc định và click **Create**.
+3. Cấu hình phần **Default cache behavior**:
+   * **Viewer protocol policy:** Chọn **Redirect HTTP to HTTPS** (Tự động chuyển hướng sang HTTPS bảo mật).
+   * **Allowed HTTP methods:** Chọn `GET, HEAD`.
+4. Cấu hình phần **Cache key and origin requests**:
+   * **Cache policy:** Chọn chính sách tối ưu sẵn **`CachingOptimized`**.
+5. Cấu hình **Web Application Firewall (WAF)**:
+   * Chọn *Do not enable security protections* (nếu muốn tối ưu chi phí trong môi trường thử nghiệm).
+6. Cuộn xuống dưới cùng và click chọn **Create distribution**.
+
+### Bước 3: Cập nhật S3 Bucket Policy cho phép OAC truy cập
+1. Sau khi tạo xong distribution, sao chép cấu hình policy JSON được sinh ra tự động (nhấp nút **Copy policy** từ thanh thông báo màu xanh lá).
+2. Quay lại tab **Permissions** của S3 bucket `h1eudayne` > Phần **Bucket policy** > Chọn **Edit**.
+3. Dán đoạn JSON vừa copy vào. Đoạn policy sẽ tương tự như sau:
    ```json
    {
        "Version": "2008-10-17",
@@ -84,7 +106,7 @@ Sau khi Distribution được khởi tạo, bạn sẽ thấy một biểu ngữ
                    "Service": "cloudfront.amazonaws.com"
                },
                "Action": "s3:GetObject",
-               "Resource": "arn:aws:s3:::vduc-cloudfront-s3-lab-01/*",
+               "Resource": "arn:aws:s3:::h1eudayne/*",
                "Condition": {
                    "StringEquals": {
                        "AWS:SourceArn": "arn:aws:cloudfront::<Account_ID>:distribution/<CF_Distribution_ID>"
@@ -94,40 +116,46 @@ Sau khi Distribution được khởi tạo, bạn sẽ thấy một biểu ngữ
        ]
    }
    ```
-6. Click chọn nút **Save changes** để lưu chính sách bảo mật mới.
+4. Chọn **Save changes**.
 
 ---
 
-### Bước 4: Kiểm thử và Xác minh
+## Hướng dẫn Kiểm thử & So sánh Tốc độ (S3 vs CloudFront)
 
-Bây giờ cấu hình đã hoàn tất, chúng ta tiến hành kiểm chứng:
-
-#### 1. Kiểm thử truy cập trực tiếp qua S3 (Bị chặn)
-1. Trong giao diện S3 bucket, click chọn đối tượng `index.html`.
-2. Sao chép địa chỉ **Object URL** ở phần Object Overview.
-3. Mở một tab ẩn danh trên trình duyệt và dán link này vào.
-4. **Kết quả**: Bạn sẽ nhận được trang thông báo lỗi **`403 Forbidden` / Access Denied** từ S3. Điều này xác nhận rằng tệp tin S3 được bảo vệ hoàn toàn và không ai có thể truy cập trực tiếp.
-
-#### 2. Kiểm thử truy cập qua CloudFront (Thành công)
-1. Quay lại dịch vụ **CloudFront**, click chọn distribution của bạn.
-2. Tại phần *Details*, sao chép địa chỉ **Distribution domain name** (có dạng `d111111abcdef8.cloudfront.net`).
-3. Mở trình duyệt và truy cập tên miền này kèm theo tên file: `https://d111111abcdef8.cloudfront.net/index.html`.
-4. **Kết quả**: Trang web HTML hiển thị đầy đủ giao diện thiết kế chào mừng. Đường truyền được tự động bảo mật qua HTTPS.
+### 1. Lấy thông tin Tên miền CloudFront (Distribution Domain Name)
+1. Truy cập dịch vụ **CloudFront** > click chọn distribution của bạn (`demo-cloudfront`).
+2. Tại tab **Details**, sao chép địa chỉ **Distribution domain name** (Ví dụ thực tế trong lab: `dyef164pbgy7w.cloudfront.net`).
 
 ---
 
-### Bước 5: Tìm hiểu cơ chế invalidate cache khi cập nhật mã nguồn
+### 2. So sánh tốc độ tải tài nguyên (Ví dụ với tệp hình ảnh dung lượng 4.7 MB)
 
-Khi tệp tĩnh được cache ở Edge Location, nếu bạn thay đổi nội dung tệp trên S3, CloudFront vẫn sẽ phân phối tệp cũ cho đến khi TTL hết hạn. Để làm mới ngay lập tức:
+Để thấy rõ sự khác biệt của CDN CloudFront trong việc tối ưu hóa hiệu năng, chúng ta thực hiện tải một hình ảnh `/images/20230408_010527653_iOS.jpg` (dung lượng 4.7 MB) và quan sát tab **Network** trong Chrome DevTools:
 
-1. Chỉnh sửa tệp `index.html` trên máy tính (ví dụ sửa chữ "Amazon CloudFront" thành "Amazon CloudFront v2").
-2. Upload đè tệp `index.html` mới này lên S3 bucket của bạn.
-3. Truy cập lại link CloudFront: Hệ thống vẫn sẽ hiển thị trang cũ do chưa hết thời gian cache.
-4. Vào lại trang quản lý **CloudFront Distribution** -> Chọn tab **Invalidations**.
-5. Click chọn **Create invalidation**.
-6. Tại ô *Object paths*, nhập `/index.html` (hoặc `/*` để xóa cache toàn bộ distribution).
-7. Nhấn **Create invalidation** và chờ trạng thái chuyển từ *In progress* sang *Completed* (mất khoảng 1-2 phút).
-8. F5 lại trình duyệt, bạn sẽ thấy nội dung mới đã được cập nhật thành công.
+#### Kịch bản 1: Truy cập trực tiếp qua S3 Web Endpoint
+* **Địa chỉ truy cập:** `http://h1eudayne.s3-website-us-east-1.amazonaws.com/images/20230408_010527653_iOS.jpg`
+* **Kết quả đo lường thực tế:** Thời gian tải tệp tin mất khoảng **3.72 giây (≈ 4s)**.
+* **Nguyên nhân:** Dữ liệu phải được truyền tải trực tiếp từ S3 bucket (nằm tại Region `us-east-1` - Bắc Virginia, Mỹ) vượt khoảng cách địa lý xa xôi về máy người dùng.
+
+#### Kịch bản 2: Truy cập qua CloudFront Distribution
+* **Địa chỉ truy cập:** `http://dyef164pbgy7w.cloudfront.net/images/20230408_010527653_iOS.jpg`
+* **Kết quả đo lường thực tế:**
+  * **Lần đầu tiên (Cache Miss):** Tốc độ tải tương đương với S3 (~4 giây) do CloudFront phải gửi request về S3 để lấy dữ liệu lần đầu và ghi vào Cache.
+  * **Từ lần thứ hai trở đi (Cache Hit):** Thời gian tải giảm đột biến chỉ còn **312 miligiây (≈ 300ms)**!
+* **Nguyên nhân:** CloudFront đã lưu tệp hình ảnh vào bộ nhớ đệm tại máy chủ Edge Location gần người dùng nhất. Ở các lượt truy cập sau, tài nguyên được phân phối tức thì từ Edge Location mà không cần quay lại S3 Origin nữa.
+
+> [!TIP]
+> Tốc độ cải thiện **gấp hơn 10 lần** (~3.7s giảm xuống còn ~300ms) chính là minh chứng rõ ràng nhất cho hiệu quả của CloudFront Caching khi triển khai các website tĩnh có nhiều tài nguyên hình ảnh, media.
+
+---
+
+### 3. Xoá Cache khi cập nhật giao diện web (Invalidations)
+Khi thay đổi mã nguồn trên S3, để khách hàng nhận được giao diện mới ngay lập tức mà không phải chờ hết thời gian TTL (Cache expiry):
+1. Chỉnh sửa nội dung tệp `index.html` trên máy tính và upload đè lên S3.
+2. Truy cập trang quản trị **CloudFront Distribution** vừa tạo.
+3. Chọn tab **Invalidations** > Click chọn **Create invalidation**.
+4. Tại ô nhập **Object paths**, gõ `/index.html` (hoặc `/*` để xóa sạch toàn bộ cache của website) > Nhấn **Create invalidation**.
+5. Đợi trạng thái chuyển từ *In progress* sang *Completed* (khoảng 1 phút), tải lại trình duyệt để xem kết quả cập nhật.
 
 ---
 
