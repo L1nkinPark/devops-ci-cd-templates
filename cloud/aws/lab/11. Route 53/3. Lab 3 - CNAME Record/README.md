@@ -2,6 +2,10 @@
 
   **[Xem Đề bài / Yêu cầu bài Lab](3.%20Lab%203%20-%20CNAME%20Record.md)**
 
+> [!NOTE]
+> Bài thực hành cấu hình CNAME trỏ tên miền về CloudFront và liên kết chứng chỉ bảo mật SSL từ ACM đã được thực hiện và minh chứng chi tiết bằng hình ảnh thực tế tại bài lab CloudFront:
+> 👉 **[Phần mở rộng: Custom Domain & SSL/TLS trong CloudFront Lab 1](../../10.%20CloudFront/1.%20Lab%201%20-%20Integrate%20CloudFront%20with%20S3/README.md#phần-mở-rộng-sử-dụng-tên-miền-tùy-chỉnh-custom-domain--ssltls-certificate-route-53--acm)**
+
 ---
 
 ## Các bước thực hiện chi tiết
