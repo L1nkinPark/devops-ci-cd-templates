@@ -1,66 +1,79 @@
 # Lab 5 - Thực hành với CloudTrail
 
 ## I. Yêu cầu bài Lab
-Tạo một **Trail** mới trong AWS CloudTrail để lưu trữ vĩnh viễn và kiểm toán lịch sử cuộc gọi API trên tài khoản AWS của bạn về một S3 Bucket bảo mật, đồng thời thực hiện tra cứu truy vết hành động xóa tài nguyên thực tế để xác định danh tính người dùng thực thi.
+Tạo một **Trail** mới trong AWS CloudTrail để lưu trữ log cuộc gọi API ra S3 bucket và CloudWatch Logs.
 
 ---
 
 ## II. Các bước thực hiện chi tiết
 
-### Bước 1: Tạo một S3 Bucket lưu trữ logs của CloudTrail
-1. Truy cập dịch vụ **S3** > Click **Create bucket**.
-2. Thiết lập thông số:
-   * **Bucket name**: Đặt tên duy nhất, ví dụ: `cloudtrail-audit-logs-yourname`.
-   * **Region**: Chọn Region chạy tài nguyên chính của bạn.
-   * Để tất cả cài đặt khác mặc định > Click **Create bucket**.
-
----
-
-### Bước 2: Khởi tạo một Trail mới trong CloudTrail
+### Bước 1: Khởi tạo một Trail mới xuất log ra S3 và CloudWatch
 1. Truy cập dịch vụ **CloudTrail** trên AWS Console.
 2. Tại menu bên trái, chọn **Trails** > Click chọn nút **Create trail**.
-3. Cấu hình thông tin Trail:
-   * **Trail name**: Nhập `account-audit-trail`.
-   * **Storage location**: Chọn **Use an existing S3 bucket** > Click **Browse** và chọn bucket `cloudtrail-audit-logs-yourname` vừa tạo ở Bước 1.
-   * **Log file SSE-KMS encryption**: Tắt (**Uncheck** - để đơn giản hóa bài lab và tránh phát sinh chi phí KMS).
-   * **Log file validation**: Tích chọn **Enabled** (đảm bảo tính toàn vẹn của file log, chống giả mạo logs).
+3. Tại bước **Choose trail attributes**:
+   * **Trail name**: Nhập `test-trail`.
+   * **Storage location**: Chọn **Create new S3 bucket**.
+   * **Trail log bucket and folder**: Nhập tên bucket (ví dụ: `cloudtrail-log-hieu` - lưu ý tên bucket phải là duy nhất).
+   * **Log file SSE-KMS encryption**: Bỏ chọn (**Disabled**) (Lưu ý: Thực tế nên bật Encrypt, nhưng làm lab nên tắt để tránh phát sinh cấu hình/chi phí).
+   * **CloudWatch Logs**: Tích chọn **Enabled**.
+     * **Log group**: Chọn **New**.
+     * **Log group name**: Nhập `test-cloudtrail`.
+     * **IAM Role**: Chọn **New**.
+     * **Role name**: Nhập `test-cloudtrail-role`.
    * Click **Next**.
-4. Chọn loại sự kiện cần ghi nhận (Choose log events):
-   * **Event type**: Tích chọn **Management events** (để ghi lại các hoạt động quản trị hạ tầng).
-   * **API activity**: Tích chọn cả **Read** và **Write**.
+4. Tại bước **Choose log events**:
+   * **Event type**: Tích chọn **Management events**.
+   * **API activity**: Tích chọn **Write**.
    * Click **Next** > Xem lại cấu hình > Click **Create trail**.
-   Trạng thái của Trail sẽ hiển thị là **`Logging`** (Đang ghi nhận).
 
 ---
 
-### Bước 3: Thực hiện một thay đổi hạ tầng thực tế để tạo sự kiện
-Chúng ta sẽ giả lập một hành động thay đổi cấu hình hạ tầng để kiểm toán:
-1. Vào dịch vụ **EC2** > Chọn **Security Groups** ở menu bên trái.
-2. Click **Create security group**:
-   * **Security group name**: Nhập `temp-test-group`.
-   * **Description**: Nhập `Testing CloudTrail audit`.
-   * Click **Create security group**.
-3. Nhấp chọn Security Group `temp-test-group` vừa tạo > Chọn **Actions** > Click **Delete security group** để xóa bỏ nó.
+### Bước 2: Kiểm tra Log group được tạo bên CloudWatch
+1. Truy cập dịch vụ **CloudWatch**.
+2. Ở menu bên trái, phần **Logs** > chọn **Log groups**.
+3. Tìm và kiểm tra xem Log group **`test-cloudtrail`** đã được hệ thống tự động tạo thành công chưa.
 
 ---
 
-### Bước 4: Truy vết hành động xóa tài nguyên trên CloudTrail Console
-Lưu ý: Mặc dù CloudTrail ghi lại API rất nhanh, các sự kiện có thể mất từ **5 đến 15 phút** để xuất hiện đầy đủ trên giao diện Console Event History.
-1. Quay lại dịch vụ **CloudTrail** > Chọn **Event history** trong menu bên trái.
-2. Tại bộ lọc tìm kiếm (Lookup attributes):
-   * Chọn **Event name** và nhập tên API xóa Security Group: **`DeleteSecurityGroup`**.
-   * Hoặc chọn **User name** và điền tên người dùng IAM của bạn.
-3. Bạn sẽ thấy một dòng sự kiện hiển thị trong danh sách. Nhấp chọn dòng sự kiện đó để xem chi tiết thông tin truy vết:
-   * **Event time**: Thời gian chính xác diễn ra hành động xóa.
-   * **User name**: Tài khoản/IAM User thực hiện hành động.
-   * **Source IP address**: Địa chỉ IP mạng thực tế của người thực hiện.
-4. Click chọn **View event** để xem tệp JSON đầy đủ. File JSON này chứa thông tin cấu hình chi tiết về tham số yêu cầu và kết quả trả về của API.
+### Bước 3: Kiểm tra S3 Bucket được tạo bên S3
+1. Truy cập dịch vụ **S3**.
+2. Ở menu bên trái, chọn **Buckets**.
+3. Tìm bucket bạn đã thiết lập ở Bước 1 (ví dụ: `cloudtrail-log-hieu`).
+4. Click vào bucket, kiểm tra xem thư mục **`AWSLogs/`** đã được tự động tạo bên trong chưa. Logs của CloudTrail sẽ bắt đầu được gửi về đây.
 
 ---
 
-### Bước 5: Kiểm tra logs thô trong S3 Bucket
-1. Quay lại dịch vụ **S3** > Mở bucket `cloudtrail-audit-logs-yourname`.
-2. Bạn sẽ thấy một cấu trúc cây thư mục được tự động sinh ra dạng:
-   `AWSLogs/ <account-id>/ CloudTrail/ <region>/ <year>/ <month>/ <day>/`
-3. Điều hướng vào thư mục ngày hiện tại. Bạn sẽ thấy các tệp tin log thô định dạng nén JSON (`.json.gz`).
-4. Bạn có thể tải tệp tin này về máy tính, giải nén và mở bằng text editor để đọc toàn bộ nhật ký kiểm toán.
+### Bước 4: Tạo một sự kiện thực tế (Tạo EC2 Instance)
+Để kiểm tra xem CloudTrail có đang ghi log hoạt động hay không, ta sẽ tạo một sự kiện làm thay đổi hạ tầng.
+1. Truy cập dịch vụ **EC2** > Click **Launch instance**.
+2. **Name**: Nhập `test-cloudtrail`.
+3. Giữ nguyên các cài đặt mặc định khác (Amazon Linux, t3.micro, v.v.) và click **Launch instance**.
+   *(Sự kiện `RunInstances` này sẽ được CloudTrail ghi lại)*.
+
+---
+
+### Bước 5: Kiểm tra Log sự kiện trên CloudWatch
+1. Quay lại dịch vụ **CloudWatch** > **Logs** > **Log groups**.
+2. Click vào Log group `test-cloudtrail` đã tạo ở Bước 1.
+3. Trong tab **Log events**, chọn log stream tương ứng. (Lưu ý: Các sự kiện có thể mất vài phút để xuất hiện).
+4. Tìm kiếm sự kiện với `eventName: "RunInstances"` hoặc `eventSource: "ec2.amazonaws.com"`.
+5. Mở rộng log event này, bạn sẽ thấy thông tin chi tiết về việc tạo EC2 instance vừa thực hiện.
+
+---
+
+### Bước 6: Kiểm tra Log sự kiện lưu trữ trên S3
+1. Truy cập dịch vụ **S3** > Mở bucket `cloudtrail-log-hieu` (hoặc tên bucket bạn đã thiết lập).
+2. Điều hướng theo đường dẫn: `AWSLogs/ <account-id>/ CloudTrail/ <region>/ <year>/ <month>/ <day>/`.
+3. Bạn sẽ thấy các tệp tin log được lưu trữ dưới định dạng nén `.json.gz`.
+4. Chọn một tệp log có chứa khoảng thời gian bạn vừa tạo EC2 > Click **Download**.
+5. Giải nén tệp `.gz` tải về, và mở tệp `.json` bên trong bằng text editor (như VSCode).
+6. Tìm kiếm từ khóa `RunInstances` trong file JSON, bạn sẽ thấy thông tin chi tiết (như `accessKeyId`, `sourceIPAddress`, `userAgent`, v.v.) chứng minh thao tác đã được lưu vết đầy đủ.
+
+---
+
+### Bước 7: Tra cứu lịch sử bằng Instance ID trên CloudTrail
+Bên cạnh việc kiểm tra log trên S3 và CloudWatch, bạn có thể dễ dàng tìm kiếm sự kiện thông qua giao diện CloudTrail:
+1. Quay lại dịch vụ **CloudTrail** > Chọn **Event history** ở menu bên trái.
+2. Tại thanh tìm kiếm (Lookup attributes), chọn bộ lọc **Resource name**.
+3. Nhập **Instance ID** của EC2 instance bạn vừa tạo (ví dụ: `i-0abcdef1234567890`).
+4. Bạn sẽ thấy ngay sự kiện `RunInstances` và các sự kiện liên quan đến instance này hiển thị chi tiết. Mở sự kiện ra để xem toàn bộ thông tin API.
