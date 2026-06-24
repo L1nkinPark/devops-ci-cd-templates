@@ -1,0 +1,7 @@
+#Install tool to stress test
+sudo yum install stress -y
+
+#Start test
+sudo stress --cpu 2 --timeout 180
+
+

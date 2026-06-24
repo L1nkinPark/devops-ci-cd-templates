@@ -188,6 +188,20 @@ Các hướng dẫn thực hành giám sát tài nguyên hệ thống, ghi nhậ
 
 ---
 
+### 16. SNS, SQS, SES Hands-on Labs
+
+Hands-on lab exercises for AWS messaging and notification services:
+
+| File | Description | Technology |
+|------|-------------|------------|
+| [1. Amazon SQS Hands-on Lab(Basic)](13.%20SNS,%20SQS,%20SES/1.%20Amazon%20SQS%20Hands-on%20Lab(Basic).md) | Create an SQS Standard Queue, send messages, and poll messages in the AWS Console | Amazon SQS |
+| [2. Amazon SQS Hands-on Lab(Dead Letter Queue)](13.%20SNS,%20SQS,%20SES/2.%20Amazon%20SQS%20Hands-on%20Lab(Dead%20Letter%20Queue).md) | Configure SQS Dead Letter Queue (DLQ), set redrive policy, and verify poison message routing | Amazon SQS DLQ |
+| [3. Amazon SNS Hands-on Lab(Basic)](13.%20SNS,%20SQS,%20SES/3.%20Amazon%20SNS%20Hands-on%20Lab(Basic).md) | Create an SNS Topic, create email subscriptions, and verify publish-subscribe messaging | Amazon SNS |
+| [4. Amazon SNS Hands-on Lab(Message Filter)](13.%20SNS,%20SQS,%20SES/4.%20Amazon%20SNS%20Hands-on%20Lab(Message%20Filter)/4.%20Amazon%20SNS%20Hands-on%20Lab(Message%20Filter).md) | Configure Amazon SNS subscription filter policies for SQS and Lambda based on custom message attributes | Amazon SNS Message Filter |
+| [5. Amazon SES Hands-on Lab(Basic)](13.%20SNS,%20SQS,%20SES/5.%20Amazon%20SES%20Hands-on%20Lab(Basic).md) | Verify domain/email identities and send test emails under Amazon SES Sandbox mode | Amazon SES Sandbox |
+
+---
+
 ## Cấu trúc khuyến nghị
 
 ```text
@@ -308,6 +322,15 @@ cloud/aws/lab/
       README.md
     5. Lab 5 - CloudTrail/
       README.md
+  13. SNS, SQS, SES/
+    1. Amazon SQS Hands-on Lab(Basic).md
+    2. Amazon SQS Hands-on Lab(Dead Letter Queue).md
+    3. Amazon SNS Hands-on Lab(Basic).md
+    4. Amazon SNS Hands-on Lab(Message Filter)/
+      4. Amazon SNS Hands-on Lab(Message Filter).md
+      README.md
+      lambda_function.py
+    5. Amazon SES Hands-on Lab(Basic).md
   README.md
 ```
 

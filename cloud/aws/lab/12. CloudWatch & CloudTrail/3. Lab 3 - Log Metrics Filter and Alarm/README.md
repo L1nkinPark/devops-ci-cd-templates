@@ -1,51 +1,93 @@
 # Lab 3 - Sử dụng Log Metrics Filter & cài đặt Alarm cho Log message
 
 ## I. Yêu cầu bài Lab
-Thiết lập bộ lọc từ khóa (**Metric Filter**) tự động quét qua các dòng nhật ký của Apache Web Server nhằm tìm kiếm mã trạng thái lỗi truy cập `404` (truy cập đường dẫn không tồn tại), và tự động gửi email cảnh báo khi số lượng lỗi vượt quá ngưỡng thiết lập.
+Thiết lập bộ lọc từ khóa (**Metric Filter**) tự động quét qua các dòng nhật ký truy cập của Apache Web Server (`test-server/access-log`) nhằm tìm kiếm từ khóa báo lỗi `ERROR`. Đồng thời, cấu hình cảnh báo **CloudWatch Alarm** tự động gửi email thông báo khi lỗi này xuất hiện trên 1 lần trong vòng 1 phút. Cần cấu hình xử lý dữ liệu thiếu dạng **missing data as good** để đảm bảo Alarm hoạt động chính xác và không cảnh báo giả khi hệ thống bình thường.
 
 ---
 
 ## II. Các bước thực hiện chi tiết
 
-### Bước 1: Tạo Metric Filter trên Log Group
-1. Truy cập **CloudWatch Console** > Chọn **Log groups** > Nhấp chọn Log Group `/var/log/httpd/access_log` đã được tạo từ Lab 2.
-2. Chuyển sang tab **Metric filters** > Click chọn nút **Create metric filter**.
+### Bước 1: Tạo Log Metric Filter trên Log Group
+1. Truy cập **CloudWatch Console** > Chọn **Log groups** trong menu bên trái > Chọn Log Group `test-server/access-log`.
+2. Chuyển sang tab **Metric filters** > Quan sát danh sách trống ban đầu và nhấp chọn **Create metric filter**:
+
+   ![Giao diện tab Metric filters của Log Group trống](../../../../../images/aws/cloudwatch_metric_filter_empty.png)
+
 3. Cấu hình bộ lọc (Define pattern):
-   * **Filter pattern**: Nhập **`" 404 "`** (có dấu khoảng trắng 2 bên để lọc chính xác mã HTTP status 404, tránh bị trùng với các chuỗi số 404 khác trong log).
+   * **Filter pattern**: Nhập **`ERROR`** (để quét tất cả các dòng log có chứa chữ ERROR).
+   * Bạn có thể chọn Instance ID trong phần *Select log data to test* để chạy thử bộ lọc trên các dòng log hiện tại.
+   
+   ![Cấu hình Filter pattern với từ khóa ERROR](../../../../../images/aws/cloudwatch_metric_filter_create.png)
+
    * Click **Next**.
-4. Thiết lập Metric:
-   * **Filter name**: Nhập `Apache-404-Filter`.
-   * **Metric namespace**: Nhập `WebServerMetrics` (Custom namespace mới).
-   * **Metric name**: Nhập `Apache404Count`.
-   * **Metric value**: Nhập **`1`** (tự động cộng thêm 1 đơn vị vào metric mỗi khi tìm thấy một dòng log khớp pattern).
-   * **Default value**: Để trống.
-   * Click **Next** > Click **Create metric filter**.
+4. Thiết lập Metric details:
+   * **Filter name**: Nhập `access-log-error-filter`.
+   * **Metric namespace**: Nhập `test-server`.
+   * **Metric name**: Nhập `access-log-error`.
+   * **Metric value**: Nhập **`1`** (mỗi lần tìm thấy từ khóa ERROR, metric sẽ tăng thêm 1 đơn vị).
+   * Click **Next** > Kiểm tra lại các thông số và click **Create metric filter**. Giao diện sẽ hiển thị filter vừa tạo thành công:
+
+   ![Metric filter access-log-error-filter được khởi tạo thành công](../../../../../images/aws/cloudwatch_metric_filter_list.png)
 
 ---
 
-### Bước 2: Tạo Alarm dựa trên Custom Metric vừa filter
-1. Tại tab **Metric filters** của Log Group, bạn sẽ thấy filter `Apache-404-Filter` vừa tạo. Tích chọn nó và click nút **Create alarm**.
+### Bước 2: Tạo Alarm dựa trên Custom Metric vừa Filter
+1. Tại tab **Metric filters** của Log Group, tích chọn filter `access-log-error-filter` vừa tạo và chọn nút **Create alarm**.
 2. Cấu hình Metric & Conditions cho Alarm:
-   * **Statistic**: Chọn **Sum** (Tổng số lỗi cộng dồn).
-   * **Period**: Chọn **1 minute** (hoặc **5 minutes**).
-   * **Threshold type**: Chọn **Static**.
-   * **Whenever Apache404Count is...**: Chọn **Greater/Threshold** và điền **`5`** (cảnh báo khi xuất hiện quá 5 lỗi 404 trong vòng 1 phút).
-   * Click **Next**.
-3. Cấu hình Actions gửi thông báo:
+   * **Namespace**: `test-server` (tự động nhận).
+   * **Metric name**: `access-log-error` (tự động nhận).
+   * **Statistic**: Chọn **Sum** (Tổng số lỗi xuất hiện).
+   * **Period**: Chọn **1 minute** (Đánh giá mỗi 1 phút).
+   * **Threshold type**: Chọn **Static** (Ngưỡng cố định).
+   * **Whenever access-log-error is...**: Chọn **Greater** (Lớn hơn) và điền giá trị ngưỡng là **`1`** (Để phát cảnh báo khi số lần xuất hiện ERROR > 1 lần trong 1 phút. *Lưu ý: Trong hình ảnh demo minh họa dưới đây sử dụng giá trị ví dụ là 3*).
+
+   ![Cấu hình Metric và các điều kiện kích hoạt Alarm](../../../../../images/aws/cloudwatch_metric_filter_alarm_conditions.png)
+
+3. Cấu hình xử lý dữ liệu thiếu (Missing data treatment) - **RẤT QUAN TRỌNG**:
+   * Click chọn phần **Additional configuration** ở phía cuối trang.
+   * **Datapoints to alarm**: Thiết lập `1 out of 1` (để kích hoạt ngay lập tức khi phát hiện lỗi).
+   * **Missing data treatment**: Chọn **Treat missing data as good (not breaching threshold)** (Xử lý dữ liệu thiếu là tốt).
+
+   ![Thiết lập xử lý dữ liệu thiếu Treat missing data as good](../../../../../images/aws/cloudwatch_metric_filter_alarm_missing_data.png)
+
+   > [!IMPORTANT]
+   > **Tại sao cần chọn "Treat missing data as good"?**
+   > File log chỉ ghi nhận từ khóa `ERROR` khi có lỗi xảy ra. Ở trạng thái bình thường ổn định, hệ thống sẽ không có log lỗi nào được đẩy lên, dẫn đến việc không có dữ liệu metric (Missing data).
+   > Nếu để mặc định (Treat missing data as missing/insufficient), Alarm sẽ chuyển sang trạng thái xám `INSUFFICIENT_DATA` hoặc phát cảnh báo giả. Việc cấu hình `Treat missing data as good` giúp Alarm giữ trạng thái màu xanh `OK` an toàn khi hệ thống chạy bình thường.
+
+4. Click **Next** và cấu hình gửi thông báo:
    * **Alarm state trigger**: Chọn **In alarm**.
-   * **Send a notification to the following SNS topic**: Chọn **Select an existing SNS topic** và chọn `cpu-alert-topic` (SNS topic đã tạo từ Lab 1).
+   * **Send a notification to the following SNS topic**: Chọn SNS topic đã tạo từ Lab 1 để nhận email cảnh báo.
    * Click **Next**.
-4. Đặt tên Alarm:
-   * **Alarm name**: Nhập `Apache-Too-Many-404-Errors`.
-   * Click **Next** > Click **Create alarm**.
+5. Đặt tên Alarm:
+   * **Alarm name**: Nhập `Apache-Access-Log-Error-Alarm`.
+   * Click **Next** > Kiểm tra lại cấu hình và click **Create alarm**.
 
 ---
 
-### Bước 3: Giả lập sinh lỗi 404 và kiểm chứng
-1. Mở trình duyệt web của bạn và truy cập liên tục vào các đường dẫn không tồn tại trên IP công cộng của EC2 instance của bạn (ví dụ: `http://<ec2-public-ip>/fake-page-1`, `http://<ec2-public-ip>/fake-page-2`, `http://<ec2-public-ip>/test-error`,...).
-2. Truy cập lỗi liên tục hơn 6 lần trong vòng 1 phút.
-3. Kiểm tra Logs để chắc chắn Apache đã ghi nhận các mã lỗi:
-   * Vào **CloudWatch Log Group** `/var/log/httpd/access_log` để xem nhật ký ghi nhận các dòng dạng:
-     `"GET /fake-page-1 HTTP/1.1" 404 196`
-4. Chờ từ 1 đến 2 phút. Bạn sẽ thấy trạng thái Alarm chuyển sang màu đỏ **`In alarm`** trên giao diện điều khiển và nhận được một email từ AWS thông báo hệ thống đang phát sinh nhiều lỗi truy cập trang không tồn tại (lỗi 404).
-5. Sau khi ngừng truy cập lỗi và hết thời gian chu kỳ đánh giá (Period), Alarm sẽ tự động chuyển đổi trạng thái về lại màu xanh **`OK`**.
+### Bước 3: Giả lập ghi log ERROR và kiểm chứng
+1. SSH vào EC2 instance.
+2. Ghi thủ công các dòng log chứa từ khóa `ERROR` vào file log của Apache để kiểm tra:
+   ```bash
+   echo 'this is test ERROR log' >> /var/log/httpd/access_log
+   ```
+   *(Thực hiện lệnh này lặp lại 6 lần trong vòng 1 phút để chắc chắn số lượng lỗi vượt quá ngưỡng cấu hình)*.
+   
+   ![Ghi liên tục logs chứa từ khóa ERROR trên terminal](../../../../../images/aws/cloudwatch_metric_filter_test_echo.png)
+   
+3. Chờ 1 phút để CloudWatch Agent thu thập log và đẩy lên CloudWatch.
+4. Kiểm tra Logs trên CloudWatch Console: Truy cập Log Group `test-server/access-log` và chọn stream của bạn để xác nhận các dòng log `this is test ERROR log` đã được đồng bộ:
+
+   ![Các dòng log lỗi kiểm thử hiển thị trên CloudWatch Log Events](../../../../../images/aws/cloudwatch_metric_filter_test_logs.png)
+
+5. Kiểm tra Alarm: Tại giao diện CloudWatch Alarms, bạn sẽ thấy trạng thái Alarm của bạn (ở đây có tên là `test-server-error-log-count-greater-than-3-in-1-minute`) đã tự động chuyển sang màu đỏ **`In alarm`**:
+
+   ![Alarm chuyển sang trạng thái cảnh báo In alarm](../../../../../images/aws/cloudwatch_metric_filter_test_alarm.png)
+
+6. Kiểm tra Email: Truy cập hộp thư đăng ký của bạn để xác nhận email cảnh báo tự động gửi về từ AWS SNS khi ngưỡng lỗi vượt quá giới hạn thiết lập:
+
+   ![Email cảnh báo chi tiết gửi về từ AWS Notifications](../../../../../images/aws/cloudwatch_metric_filter_test_email.png)
+
+7. Khi hệ thống ổn định và không phát sinh thêm bất kỳ log ERROR nào nữa, nhờ cấu hình xử lý dữ liệu thiếu **`Treat missing data as good`**, Alarm sẽ tự động chuyển trạng thái an toàn về lại màu xanh **`OK`** sau chu kỳ đánh giá tiếp theo.
+
+
