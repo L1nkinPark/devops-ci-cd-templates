@@ -202,6 +202,42 @@ Hands-on lab exercises for AWS messaging and notification services:
 
 ---
 
+### 17. EventBridge Hands-on Labs
+
+Các hướng dẫn thực hành xây dựng và định tuyến sự kiện với Amazon EventBridge:
+
+| File | Mô tả | Công nghệ |
+|------|-------|-----------|
+| [1. Lab 1 – Thao tác với Amazon EventBridge](14.%20EventBridge/1.%20Lab%201%20-%20Thao%20tac%20vs%20Event%20Bridge/1.%20Lab%201%20-%20Thao%20tac%20vs%20Event%20Bridge.md) | Khởi tạo Custom Event Bus, cấu hình Rules để lọc sự kiện (content-based filtering) và định tuyến tới Target SQS / SNS | Amazon EventBridge, SQS, SNS |
+| [2. Lab 2 – Capture Sự kiện (SK) với EventBridge](14.%20EventBridge/2.%20Lab%202%20-%20Capture%20SK%20vs%20Event%20Bridge/2.%20Lab%202%20-%20Capture%20SK%20vs%20Event%20Bridge.md) | Sử dụng Default Event Bus của AWS để tự động bắt các sự kiện thay đổi trạng thái của EC2 instance và thông báo qua Email | Amazon EventBridge, EC2, SNS |
+
+---
+
+### 18. Elastic Beanstalk Hands-on Labs
+
+Các hướng dẫn thực hành triển khai và cập nhật ứng dụng PaaS trên AWS Elastic Beanstalk:
+
+| File | Mô tả | Công nghệ |
+|------|-------|-----------|
+| [1. Lab 1 – Triển khai ứng dụng lên Elastic Beanstalk](15.%20Elastic%20Beanstalk/1.%20Lab%201%20-%20Deploy%20Application%20to%20Elastic%20Beanstalk/1.%20Lab%201%20-%20Deploy%20Application%20to%20Elastic%20Beanstalk.md) | Khởi tạo Application, Environment và triển khai ứng dụng Node.js, cấu hình mạng VPC, IAM Roles và kích hoạt Load Balancer | AWS Elastic Beanstalk, Node.js, ALB |
+| [2. Lab 2 – Cập nhật phiên bản ứng dụng](15.%20Elastic%20Beanstalk/2.%20Lab%202%20-%20Update%20Version/2.%20Lab%202%20-%20Update%20Version.md) | Thực hành cập nhật phiên bản mới của mã nguồn lên môi trường Elastic Beanstalk bằng chính sách Rolling deployment | AWS Elastic Beanstalk, Rolling Update |
+| [3. Lab 3 – Blue-Green Deployment](15.%20Elastic%20Beanstalk/3.%20Lab%203%20-%20Blue-Green%20Deployment/3.%20Lab%203%20-%20Blue-Green%20Deployment.md) | Triển khai phương pháp Blue/Green Deployment thông qua việc tráo đổi URL (Swap CNAMEs) giữa hai môi trường hoạt động độc lập | AWS Elastic Beanstalk, Blue-Green |
+
+---
+
+### 19. ECS & ECR Hands-on Labs
+
+Các hướng dẫn thực hành quản lý kho lưu trữ ảnh và điều phối container trên AWS ECS & ECR:
+
+| File | Mô tả | Công nghệ |
+|------|-------|-----------|
+| [1. Lab 1 – Build và chạy custom image sử dụng Dockerfile](16.%20ECS%20&%20ECR/1.%20Lab%201%20-%20Build%20and%20Run%20Custom%20Image/1.%20Lab%201%20-%20Build%20and%20Run%20Custom%20Image.md) | Viết Dockerfile đóng gói ứng dụng web tĩnh chạy trên nền Web Server Apache, build và khởi chạy Docker container cục bộ | Docker, Apache httpd |
+| [2. Lab 2 – Tạo và Push Image lên ECR](16.%20ECS%20&%20ECR/2.%20Lab%202%20-%20Create%20and%20Push%20Image%20to%20ECR/2.%20Lab%202%20-%20Create%20and%20Push%20Image%20to%20ECR.md) | Khởi tạo repository trên Amazon ECR, đăng nhập Docker client, gắn thẻ tag và đẩy image cục bộ lên ECR private registry | Docker, AWS ECR, AWS CLI |
+| [3. Lab 3 – ECS Cluster - Run Task](16.%20ECS%20&%20ECR/3.%20Lab%203%20-%20ECS%20Cluster%20-%20Run%20Task/3.%20Lab%203%20-%20ECS%20Cluster%20-%20Run%20Task.md) | Khởi tạo ECS Cluster chế độ Fargate, tạo Task Definition trỏ đến ECR image và chạy Task độc lập kiểm tra truy cập IP công cộng | Docker, AWS ECS, Fargate |
+| [4. Lab 4 – ECS Cluster - RUN Service](16.%20ECS%20&%20ECR/4.%20Lab%204%20-%20ECS%20Cluster%20-%20RUN%20Service/4.%20Lab%204%20-%20ECS%20Cluster%20-%20RUN%20Service.md) | Khởi tạo ECS Service, kết nối Application Load Balancer cổng 80 và Target Group IP, disable Public IP của Task và kiểm tra tự sửa lỗi (Self-Healing) | Docker, AWS ECS Service, ALB, Target Group |
+
+---
+
 ## Cấu trúc khuyến nghị
 
 ```text
@@ -331,6 +367,34 @@ cloud/aws/lab/
       README.md
       lambda_function.py
     5. Amazon SES Hands-on Lab(Basic).md
+  14. EventBridge/
+    1. Lab 1 - Thao tac vs Event Bridge/
+      1. Lab 1 - Thao tac vs Event Bridge.md
+      lab1-event-bridge-filter.txt
+    2. Lab 2 - Capture SK vs Event Bridge/
+      2. Lab 2 - Capture SK vs Event Bridge.md
+  15. Elastic Beanstalk/
+    1. Lab 1 - Deploy Application to Elastic Beanstalk/
+      1. Lab 1 - Deploy Application to Elastic Beanstalk.md
+      app.js
+      app.zip
+    2. Lab 2 - Update Version/
+      2. Lab 2 - Update Version.md
+    3. Lab 3 - Blue-Green Deployment/
+      3. Lab 3 - Blue-Green Deployment.md
+  16. ECS & ECR/
+    1. Lab 1 - Build and Run Custom Image/
+      1. Lab 1 - Build and Run Custom Image.md
+      Dockerfile
+      index.html
+    2. Lab 2 - Create and Push Image to ECR/
+      2. Lab 2 - Create and Push Image to ECR.md
+      Dockerfile
+      index.html
+    3. Lab 3 - ECS Cluster - Run Task/
+      3. Lab 3 - ECS Cluster - Run Task.md
+    4. Lab 4 - ECS Cluster - RUN Service/
+      4. Lab 4 - ECS Cluster - RUN Service.md
   README.md
 ```
 

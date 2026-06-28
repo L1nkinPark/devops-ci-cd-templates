@@ -22,9 +22,9 @@ Thư mục này mô tả các dịch vụ AWS thường được sử dụng tro
 | 12 | [CloudWatch & CloudTrail](12.%20CloudWatch%20&%20CloudTrail/1.%20Why%20Monitor%20System.md) | Giám sát tài nguyên & Ghi vết hoạt động (Monitoring & Auditing) |
 | 13 | [SNS, SQS, SES (Simple Notification, Simple Queue, Simple Email)](13.%20SNS,%20SQS,%20SES/1.%20SQS%20Overview.md) | Các dịch vụ truyền tin & thông báo (Messaging & Notification) |
 | 14 | [EventBridge (Amazon EventBridge)](14.%20EventBridge/1.%20EventBridge%20Overview.md) | Quản lý và định tuyến sự kiện (Event Router) |
-| 15 | [EKS (Elastic Kubernetes Service)](15.%20EKS.md) | Dịch vụ Kubernetes được quản lý (Managed Kubernetes) |
-| 16 | [ECS (Elastic Container Service)](16.%20ECS.md) | Điều phối container (Container Orchestration) |
-| 17 | [ECR (Elastic Container Registry)](17.%20ECR.md) | Kho lưu trữ Docker image (Docker Registry) |
+| 15 | [Elastic Beanstalk](15.%20Elastic%20Beanstalk/1.%20Elastic%20Beanstalk%20Overview.md) | Dịch vụ triển khai ứng dụng web nhanh chóng (PaaS) |
+| 16 | [ECS & ECR](16.%20ECS%20&%20ECR/1.%20Container%20Overview.md) | Điều phối container và kho lưu trữ Docker image |
+| 17 | [EKS (Elastic Kubernetes Service)](17.%20EKS.md) | Dịch vụ Kubernetes được quản lý (Managed Kubernetes) |
 | 18 | [CodePipeline / CodeBuild / CodeDeploy](18.%20CodePipeline.md) | Bộ dịch vụ CI/CD nguyên bản của AWS (Pipeline) |
 | 19 | [ACM (Certificate Manager)](19.%20ACM.md) | Quản lý chứng chỉ bảo mật TLS/SSL (ACM) |
 | 20 | [EFS (Elastic File System)](20.%20EFS.md) | Hệ thống tệp lưu trữ dùng chung (Shared Storage) |
