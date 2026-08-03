@@ -15,7 +15,7 @@ Thu muc nay mo ta cac dich vu AWS thuong duoc su dung trong quy trinh DevOps va 
 | 5 | [RDS](#5-rds---relational-database-service) | Managed database |
 | 6 | [S3](#5-s3---simple-storage-service) | Object storage |
 | 7 | [VPC](#6-vpc---virtual-private-cloud) | Virtual network |
-| 8 | [IAM](#7-iam---identity--access-management) | Identity & access management |
+| 8 | [IAM (Identity & Access Management)](2. IAM/1. Amazon IAM.md) | Identity & access management |
 | 9 | [CodePipeline / CodeBuild / CodeDeploy](#8-codepipeline--codebuild--codedeploy) | CI/CD native AWS |
 | 10 | [Route 53](#9-route-53) | DNS |
 | 11 | [CloudFront](#10-cloudfront) | CDN |
@@ -169,6 +169,20 @@ VPC la mang ao rieng tren AWS, cho phep ban dinh nghia dai IP, subnet, route tab
 ---
 
 ## 8. IAM - Identity & Access Management
+
+**Danh sach tai lieu hoc tap va huong dan chi tiet:**
+
+### Tai lieu ly thuyet (Theory Documents)
+- [1. Amazon IAM](2. IAM/1. Amazon IAM.md): Nhiệm vụ định danh và phân quyền, quản lý ai (who) và cái gì (what) có thể access như thế nào, các use case của IAM (ABAC, Multi-account, Guardrails, Least privilege).
+- [2. Amazon IAM Concept](2. IAM/2. Amazon IAM Concept.md): Các khái niệm cốt lõi của IAM bao gồm User, Group, Role, và Permission (Policy) để đảm bảo tiêu chí về Security.
+- [3. Amazon IAM Policy](2. IAM/3. Amazon IAM Policy.md): Tìm hiểu về chính sách phân quyền, cấu trúc Statement, phân loại Inline vs Managed Policies và tiêu chí lựa chọn.
+- [4. Amazon IAM User](2. IAM/4. Amazon IAM User.md): Đại diện cho hồ sơ người dùng trên AWS, phương thức truy cập qua Console/Programmatic và nguyên tắc cấp quyền mặc định.
+- [5. Amazon IAM Role](2. IAM/5. Amazon IAM Role.md): Vai trò phân quyền, so sánh khái niệm, ứng dụng gắn vào EC2/Lambda, cross-account assume-role và tầm quan trọng trong troubleshooting.
+- [6. Amazon IAM Group](2. IAM/6. Amazon IAM Group.md): Nhóm người dùng, phân chia quyền theo phòng ban/vai trò, cơ chế kế thừa quyền và các quy tắc xung đột, lồng nhau.
+- [7. Amazon IAM Policy vs Resource Policy](2. IAM/7. Amazon IAM Policy vs Resource Policy.md): So sánh Identity-based Policy (IAM Policy) và Resource-based Policy (Resource Policy), cơ chế kết hợp quyền hạn (Union/Deny) và mẹo xử lý sự cố sử dụng AWS Root Account.
+
+### Huong dan thuc hanh (Hands-on Labs)
+- [8. Amazon IAM Hands-on Lab(User, Group and Policy)](2. IAM/8. Amazon IAM Hands-on Lab(User, Group and Policy).md) (Lien ket den thuc hanh deploy): Thực hành tạo nhóm người dùng có quyền quản trị, thêm người dùng mới, tải csv credentials và đăng nhập console để kiểm nghiệm.
 
 **No la gi:**
 IAM la dich vu quan ly quyen truy cap tren AWS. IAM cho phep tao user, group, role va policy de kiem soat ai duoc phep lam gi voi tai nguyen AWS. Trong DevOps, IAM role duoc su dung cho EC2 instance, EKS pod (IRSA), Lambda function va CI/CD pipeline.
