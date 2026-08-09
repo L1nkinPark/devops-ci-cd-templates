@@ -17,7 +17,7 @@
 3. Nhấp chọn **Create function** ở góc dưới bên phải.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_lambda_create_function.png" alt="Khởi tạo Lambda Function" width="750"/>
+  <img src="../../../../../images/aws/apigw_lambda_create_function.png" alt="Khởi tạo Lambda Function" width="750"/>
 </p>
 
 ---
@@ -82,7 +82,7 @@ def calculate(num1, num2, operator):
 4. Nhấn nút **Deploy** phía trên code editor để lưu và áp dụng mã nguồn mới lên AWS.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_lambda_code_editor.png" alt="Cập nhật code Lambda và Deploy" width="750"/>
+  <img src="../../../../../images/aws/apigw_lambda_code_editor.png" alt="Cập nhật code Lambda và Deploy" width="750"/>
 </p>
 
 ---
@@ -93,7 +93,7 @@ def calculate(num1, num2, operator):
 2. Cuộn xuống và tìm mục **REST API** (không chọn *REST API Private*), nhấn **Build**.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_create_rest_api.png" alt="Chọn REST API Build" width="750"/>
+  <img src="../../../../../images/aws/apigw_create_rest_api.png" alt="Chọn REST API Build" width="750"/>
 </p>
 
 3. Điền các thông số khởi tạo:
@@ -105,7 +105,7 @@ def calculate(num1, num2, operator):
 4. Nhấn nút **Create API** ở góc dưới cùng bên phải.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_api_details.png" alt="Cấu hình API details" width="750"/>
+  <img src="../../../../../images/aws/apigw_api_details.png" alt="Cấu hình API details" width="750"/>
 </p>
 
 ---
@@ -121,7 +121,7 @@ Ta cần tạo một Endpoint dạng `POST /calculate` nhận các thông số t
    * Nhấp chọn **Create resource**.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_create_resource.png" alt="Tạo resource thành công" width="750"/>
+  <img src="../../../../../images/aws/apigw_create_resource.png" alt="Tạo resource thành công" width="750"/>
 </p>
 
 3. Click chọn resource `/calculate` vừa tạo trong cây thư mục $\rightarrow$ Click chọn **Create method**:
@@ -132,17 +132,17 @@ Ta cần tạo một Endpoint dạng `POST /calculate` nhận các thông số t
    * Nhấn **Create method** ở góc dưới cùng bên phải.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_integration_request_settings.png" alt="Xem chi tiết Integration Request" width="750"/>
+  <img src="../../../../../images/aws/apigw_integration_request_settings.png" alt="Xem chi tiết Integration Request" width="750"/>
 </p>
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_lambda_proxy_toggle.png" alt="Bật Lambda proxy integration" width="700"/>
+  <img src="../../../../../images/aws/apigw_lambda_proxy_toggle.png" alt="Bật Lambda proxy integration" width="700"/>
 </p>
 
 4. Sau khi click tạo, API Gateway sẽ tự động gán quyền gọi (invoke permission) cho Lambda function. Giao diện sau khi tạo thành công sẽ như hình bên dưới:
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_method_execution.png" alt="Giao diện Method Execution chi tiết" width="750"/>
+  <img src="../../../../../images/aws/apigw_method_execution.png" alt="Giao diện Method Execution chi tiết" width="750"/>
 </p>
 
 ---
@@ -160,11 +160,11 @@ Sau khi cấu hình xong tài nguyên, ta cần tạo Stage triển khai và dep
 3. Click nút **Create stage**.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_stages_list.png" alt="Chọn tạo Stage mới" width="750"/>
+  <img src="../../../../../images/aws/apigw_stages_list.png" alt="Chọn tạo Stage mới" width="750"/>
 </p>
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_create_stage.png" alt="Điền thông số Stage dev" width="750"/>
+  <img src="../../../../../images/aws/apigw_create_stage.png" alt="Điền thông số Stage dev" width="750"/>
 </p>
 
 #### 2. Triển khai Resource lên Stage vừa tạo
@@ -176,13 +176,13 @@ Sau khi cấu hình xong tài nguyên, ta cần tạo Stage triển khai và dep
 4. Nhấn nút **Deploy**.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_deploy_api_dialog.png" alt="Deploy API lên Stage dev" width="550"/>
+  <img src="../../../../../images/aws/apigw_deploy_api_dialog.png" alt="Deploy API lên Stage dev" width="550"/>
 </p>
 
 5. Sau khi Deploy thành công, hệ thống sẽ chuyển bạn đến màn hình quản trị Stage. Tại đây, hãy sao chép **Invoke URL** của API. 
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_stage_invoke_url.png" alt="Sao chép Invoke URL từ Stage dev" width="750"/>
+  <img src="../../../../../images/aws/apigw_stage_invoke_url.png" alt="Sao chép Invoke URL từ Stage dev" width="750"/>
 </p>
 
 Endpoint URL POST đầy đủ để gọi tới Lambda của bạn (thêm `/calculate`) sẽ là:
@@ -211,14 +211,14 @@ curl -X POST https://{api-id}.execute-api.{region}.amazonaws.com/dev/calculate \
 2. Thư mục `cloud-basic` chứa 4 request tương ứng với 4 phép toán (`ADD`, `SUBSTRACT`, `MULTIPLE`, `DEVIDE`).
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_postman_collection.png" alt="Import thành công Postman Collection" width="300"/>
+  <img src="../../../../../images/aws/apigw_postman_collection.png" alt="Import thành công Postman Collection" width="300"/>
 </p>
 
 3. Chọn request **Calculator API Gateway-ADD** $\rightarrow$ Thay thế đường dẫn URL bằng **Invoke URL** đầy đủ bạn lấy được ở Bước 5 (ví dụ: `https://da0brxb62b.execute-api.us-east-1.amazonaws.com/dev/calculate`).
 4. Nhấn **Send** để gửi request.
 
 <p align="center">
-  <img src="../../../../images/aws/apigw_postman_test_response.png" alt="Gọi thành công API trên Postman" width="750"/>
+  <img src="../../../../../images/aws/apigw_postman_test_response.png" alt="Gọi thành công API trên Postman" width="750"/>
 </p>
 
 #### Kết quả phản hồi (Response)
