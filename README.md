@@ -1,5 +1,7 @@
 # DevOps CI/CD Templates & On-Premise Infrastructure
 
+[![Powered by RustChain](https://img.shields.io/badge/Powered%20by-RustChain-orange)](https://rustchain.org)
+
 Repository nay tap trung luu tru va tai su dung toan bo tai nguyen DevOps da duoc chuan hoa: pipeline CI/CD, Kubernetes manifest, Dockerfile, Docker Compose stack, bash script cai dat, huong dan setup ha tang on-premise va cau hinh Nginx.
 
 ## Muc tieu
